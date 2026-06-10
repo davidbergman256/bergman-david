@@ -6,64 +6,42 @@
     <title>David Bergman</title>
     <meta
       name="description"
-      content="David Bergman's personal site for software, AI tools, and selected work."
+      content="David Bergman's personal site for projects and writing."
     />
     <link rel="canonical" href="https://bergmandavid.com/" />
     <meta property="og:title" content="David Bergman" />
     <meta
       property="og:description"
-      content="Software, AI tools, and selected work by David Bergman."
+      content="David Bergman's personal site for projects and writing."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://bergmandavid.com/" />
-    <meta name="theme-color" content="#111111" />
+    <meta name="theme-color" content="#38cbb5" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="site-shell">
-      <section class="hero" aria-labelledby="page-title">
-        <div class="hero-copy">
-          <p class="eyebrow">Personal site</p>
-          <h1 id="page-title">David Bergman</h1>
-          <p class="lede">
-            I build practical software, AI workflows, and tools that turn messy
-            ideas into working systems.
-          </p>
-          <div class="actions" aria-label="Primary links">
-            <a class="button primary" href="mailto:bergmandavid24.7on@gmail.com">
-              Email
-            </a>
-            <a
-              class="button secondary"
-              href="https://github.com/davidbergman256"
-              rel="me"
-            >
-              GitHub
-            </a>
-          </div>
-        </div>
-
-        <div class="signal-panel" aria-label="Site status">
-          <div class="signal-topline">
-            <span class="status-dot" aria-hidden="true"></span>
-            <span>Live workspace</span>
-          </div>
-          <dl>
-            <div>
-              <dt>Focus</dt>
-              <dd>Software, AI, product systems</dd>
-            </div>
-            <div>
-              <dt>Base</dt>
-              <dd>GitHub Pages</dd>
-            </div>
-            <div>
-              <dt>Domain</dt>
-              <dd>bergmandavid.com</dd>
-            </div>
-          </dl>
-        </div>
+    <main
+      class="horizontal-stage"
+      data-loop-scroller
+      aria-label="David Bergman site sections"
+    >
+      <section class="panel panel-writing" aria-hidden="true">
+        <h2>writing</h2>
+      </section>
+      <section class="panel panel-projects" id="projects">
+        <h2>projects</h2>
+      </section>
+      <section class="panel panel-david" id="home">
+        <h1>david bergman</h1>
+      </section>
+      <section class="panel panel-writing" id="writing">
+        <h2>writing</h2>
+      </section>
+      <section class="panel panel-projects" aria-hidden="true">
+        <h2>projects</h2>
       </section>
     </main>
+
+    <script src="site.js"></script>
   </body>
 </html>
