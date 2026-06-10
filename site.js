@@ -2,70 +2,118 @@ const scroller = document.querySelector("[data-loop-scroller]");
 
 if (scroller) {
   const realPanelCount = 3;
+  const firstRealIndex = 1;
   const startIndex = 2;
+  const lastRealIndex = 3;
+  const cloneBeforeIndex = 0;
+  const cloneAfterIndex = 4;
+
   let panelWidth = window.innerWidth;
-  let isJumping = false;
-  let wheelFrame = 0;
+  let currentX = panelWidth * startIndex;
+  let targetX = currentX;
+  let velocity = 0;
+  let isAnimating = false;
+  let isWrapping = false;
 
-  const snapTo = (index, behavior = "auto") => {
-    scroller.scrollTo({
-      left: panelWidth * index,
-      behavior,
-    });
+  const clampLoopPosition = () => {
+    const min = panelWidth * cloneBeforeIndex;
+    const max = panelWidth * cloneAfterIndex;
+
+    if (currentX <= min + 1) {
+      currentX = panelWidth * lastRealIndex;
+      targetX = currentX;
+      scroller.scrollLeft = currentX;
+    }
+
+    if (currentX >= max - 1) {
+      currentX = panelWidth * firstRealIndex;
+      targetX = currentX;
+      scroller.scrollLeft = currentX;
+    }
   };
 
-  const recalc = () => {
-    panelWidth = window.innerWidth;
-    const nearest = Math.round(scroller.scrollLeft / panelWidth);
-    snapTo(nearest || startIndex);
-  };
+  const animate = () => {
+    isAnimating = true;
 
-  const wrapIfNeeded = () => {
-    if (isJumping) {
+    const distance = targetX - currentX;
+    velocity += distance * 0.024;
+    velocity *= 0.86;
+    currentX += velocity;
+
+    scroller.scrollLeft = currentX;
+
+    if (Math.abs(distance) < 0.35 && Math.abs(velocity) < 0.35) {
+      currentX = targetX;
+      scroller.scrollLeft = currentX;
+      clampLoopPosition();
+      isAnimating = false;
       return;
     }
 
-    const index = Math.round(scroller.scrollLeft / panelWidth);
+    clampLoopPosition();
+    requestAnimationFrame(animate);
+  };
 
-    if (index === 0) {
-      isJumping = true;
-      requestAnimationFrame(() => {
-        snapTo(realPanelCount);
-        requestAnimationFrame(() => {
-          isJumping = false;
-        });
-      });
-    }
+  const requestScroll = (delta) => {
+    targetX += delta;
 
-    if (index === realPanelCount + 1) {
-      isJumping = true;
-      requestAnimationFrame(() => {
-        snapTo(1);
-        requestAnimationFrame(() => {
-          isJumping = false;
-        });
-      });
+    if (!isAnimating) {
+      requestAnimationFrame(animate);
     }
+  };
+
+  const snapTo = (index) => {
+    currentX = panelWidth * index;
+    targetX = currentX;
+    velocity = 0;
+    scroller.scrollLeft = currentX;
+  };
+
+  const recalc = () => {
+    const index = Math.round(scroller.scrollLeft / panelWidth) || startIndex;
+    panelWidth = window.innerWidth;
+    snapTo(index);
   };
 
   scroller.addEventListener(
     "wheel",
     (event) => {
-      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
-        return;
-      }
-
       event.preventDefault();
-      scroller.scrollLeft += event.deltaY;
 
-      cancelAnimationFrame(wheelFrame);
-      wheelFrame = requestAnimationFrame(wrapIfNeeded);
+      const delta =
+        Math.abs(event.deltaX) > Math.abs(event.deltaY)
+          ? event.deltaX
+          : event.deltaY;
+
+      requestScroll(delta * 1.35);
     },
     { passive: false },
   );
 
+  window.addEventListener("keydown", (event) => {
+    const keyDelta = panelWidth * 0.18;
+
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      requestScroll(keyDelta);
+    }
+
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      requestScroll(-keyDelta);
+    }
+  });
+
   scroller.addEventListener("scroll", () => {
-    requestAnimationFrame(wrapIfNeeded);
+    if (isWrapping || isAnimating) {
+      return;
+    }
+
+    isWrapping = true;
+    currentX = scroller.scrollLeft;
+    targetX = currentX;
+    clampLoopPosition();
+    isWrapping = false;
   });
 
   window.addEventListener("resize", recalc);

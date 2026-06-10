@@ -17,6 +17,9 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://bergmandavid.com/" />
     <meta name="theme-color" content="#38cbb5" />
+    <link rel="preload" href="assets/blog.png" as="image" />
+    <link rel="preload" href="assets/writing.jpg" as="image" />
+    <link rel="preload" href="assets/david.jpg" as="image" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -26,19 +29,20 @@
       aria-label="David Bergman site sections"
     >
       <section class="panel panel-writing" aria-hidden="true">
-        <h2>writing</h2>
+        <img class="panel-media" src="assets/writing.jpg" alt="" />
       </section>
       <section class="panel panel-projects" id="projects">
-        <h2>projects</h2>
+        <img class="panel-media" src="assets/blog.png" alt="projects" />
       </section>
       <section class="panel panel-david" id="home">
-        <h1>david bergman</h1>
+        <h1 class="sr-only">david bergman</h1>
+        <img class="panel-media" src="assets/david.jpg" alt="" />
       </section>
       <section class="panel panel-writing" id="writing">
-        <h2>writing</h2>
+        <img class="panel-media" src="assets/writing.jpg" alt="writing" />
       </section>
       <section class="panel panel-projects" aria-hidden="true">
-        <h2>projects</h2>
+        <img class="panel-media" src="assets/blog.png" alt="" />
       </section>
     </main>
 
