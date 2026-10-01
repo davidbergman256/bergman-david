@@ -4,48 +4,56 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>David Bergman</title>
-    <meta
-      name="description"
-      content="David Bergman's personal site for projects and writing."
-    />
+    <meta name="description" content="Currently, I'm learning Math and CS at MIT." />
     <link rel="canonical" href="https://bergmandavid.com/" />
     <meta property="og:title" content="David Bergman" />
-    <meta
-      property="og:description"
-      content="David Bergman's personal site for projects and writing."
-    />
+    <meta property="og:description" content="Currently, I'm learning Math and CS at MIT." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://bergmandavid.com/" />
-    <meta name="theme-color" content="#38cbb5" />
-    <link rel="preload" href="assets/blog.png" as="image" />
-    <link rel="preload" href="assets/writing.jpg" as="image" />
-    <link rel="preload" href="assets/david.jpg" as="image" />
+    <meta property="og:image" content="https://bergmandavid.com/assets/photo-of-the-week.jpg" />
+    <meta property="og:image:alt" content="A yellow pickup truck parked on a leafy street." />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="preload"
+      href="Mozilla_Text/MozillaText-VariableFont_wght.ttf"
+      as="font"
+      type="font/ttf"
+      crossorigin
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main
-      class="horizontal-stage"
-      data-loop-scroller
-      aria-label="David Bergman site sections"
-    >
-      <section class="panel panel-writing" aria-hidden="true">
-        <img class="panel-media" src="assets/writing.jpg" alt="" />
+    <main class="page">
+      <section class="about" aria-labelledby="name">
+        <h1 id="name">David Bergman</h1>
+        <div class="bio">
+          <p>Currently, I'm learning Math and CS at MIT.</p>
+          <p>
+            Previously, I've worked on projects like
+            <a href="https://sociolaunch.com/">sociolaunch</a> or
+            <a href="https://globalink1.vercel.app/">globalink1.vercel.app</a>.
+            In my free time, I enjoy drawing, playing the violin, and poker.
+          </p>
+          <p>
+            Check out my <a href="assets/David_Bergman_Resume.pdf">resume</a> here,
+            explore my work on <a href="https://github.com/davidbergman256">github</a>,
+            or say hi on <a href="https://x.com/DavidB11012">x</a>,
+            <a href="https://www.linkedin.com/in/david-bergman-a36812332/">linkedin</a>,
+            or at <a class="email" href="mailto:a@bergmandavid.com">a[at]bergmandavid.com</a>.
+          </p>
+        </div>
       </section>
-      <section class="panel panel-projects" id="projects">
-        <img class="panel-media" src="assets/blog.png" alt="projects" />
-      </section>
-      <section class="panel panel-david" id="home">
-        <h1 class="sr-only">david bergman</h1>
-        <img class="panel-media" src="assets/david.jpg" alt="" />
-      </section>
-      <section class="panel panel-writing" id="writing">
-        <img class="panel-media" src="assets/writing.jpg" alt="writing" />
-      </section>
-      <section class="panel panel-projects" aria-hidden="true">
-        <img class="panel-media" src="assets/blog.png" alt="" />
-      </section>
+      <figure class="weekly-photo">
+        <img
+          src="assets/photo-of-the-week.jpg"
+          alt="A pale yellow pickup truck parked in front of gray houses and leafy green trees."
+          width="960"
+          height="1280"
+          fetchpriority="high"
+        />
+        <figcaption>photo of the week</figcaption>
+      </figure>
     </main>
-
-    <script src="site.js"></script>
   </body>
 </html>
