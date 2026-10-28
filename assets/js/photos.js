@@ -1,7 +1,7 @@
 // Photos start as ASCII and develop into the real image, spreading out from
 // wherever the cursor enters. Leave, and the characters grow back over it.
 
-import { AsciiCanvas, clamp, cssVar, currentTheme, fontsReady, hexToRgb, onThemeChange, reducedMotion, rgba, typeCouplets } from "./common.js?v=17";
+import { AsciiCanvas, clamp, cssVar, currentTheme, fontsReady, hexToRgb, onThemeChange, reducedMotion, rgba, typeCouplets } from "./common.js?v=18";
 
 const RAMP = " .,:;-=+*x#%";
 const LEVELS = 10;

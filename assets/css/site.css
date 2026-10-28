@@ -119,8 +119,20 @@ a:hover {
 }
 
 .nav a[aria-current="page"] {
+  position: relative;
   color: var(--ink);
-  font-weight: 500;
+}
+
+/* The current page sits on a small ripple. */
+.nav a[aria-current="page"]::after {
+  content: "~";
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  transform: translateX(-50%);
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1;
 }
 
 .theme-toggle {
