@@ -81,8 +81,8 @@ const PALETTES = {
   },
 };
 
-// Body glyphs by band, ridge to edge; the second of each pair is the
-// occasional scale.
+// Body glyphs by band, from the back out to the flanks; the second of each
+// pair is the occasional scale.
 const BODY = ["@#", "#%", "*+"];
 
 const VARIETIES = [

@@ -93,18 +93,21 @@ const PLATES = {
     const lane = flag ? flag.lane : 1;
     const staleOn = flag || (done > stale && p > (stale + 1) * width + 70);
     for (let y = top; y < top + count * 2; y++) for (const x of warp) s.put(x, y, "|");
+    // Each decision is its own thread; it passes over and under the streams.
+    const threads = "-=~-=~";
     for (let r = 0; r < count; r++) {
       const y = top + 1 + r * 2;
       if (r > done) continue;
       const end = r < done ? width : head;
+      const thread = threads[r];
       for (let k = 0; k < end; k++) {
         const x = 3 + k;
         const wi = warp.indexOf(x);
         const isStale = staleOn && r === stale && x >= warp[lane] - 4 && x <= warp[lane] + 4;
         if (wi >= 0) {
-          if ((r + wi) % 2 === 0) s.put(x, y, isStale ? "!" : "-", isStale);
+          if ((r + wi) % 2 === 0) s.put(x, y, isStale ? "!" : thread, isStale);
         } else {
-          s.put(x, y, isStale ? "~" : "-", isStale);
+          s.put(x, y, isStale ? "~" : thread, isStale);
         }
       }
       if (r === done && done < count) s.text(3 + head, y, "<>", true);
