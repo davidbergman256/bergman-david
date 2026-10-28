@@ -48,6 +48,7 @@ const PALETTES = {
     leaf1: "#c48728",
     leaf2: "#8c4b2b",
     moon: "#ffffff",
+    letter: "#1e2622",
     snow: "#8fa2ab",
     petal: "#d4869c",
     firefly: "#b8902f",
@@ -73,6 +74,7 @@ const PALETTES = {
     leaf1: "#dfa641",
     leaf2: "#b56340",
     moon: "#f1ead0",
+    letter: "#e3e8df",
     snow: "#e2ebef",
     petal: "#eeaabd",
     firefly: "#f3d77e",
@@ -375,7 +377,7 @@ class Koi {
     const desired = Math.atan2(sy, sx);
     const dh = angleDiff(this.heading, desired);
     // A koi can't turn tighter than about a third of its length.
-    const maxTurn = Math.min(turn, this.speed / (this.L * 0.3) + 0.3) * dt;
+    const maxTurn = Math.min(turn, this.speed / (this.L * 0.32) + 0.16) * dt;
     this.heading += clamp(dh, -maxTurn, maxTurn);
     this.speed = lerp(this.speed, targetSpeed, 1 - Math.exp(-dt * (this.mode === "flee" ? 4 : 1.2)));
     this.z = lerp(this.z, this.zTarget, 1 - Math.exp(-dt * 0.5));
@@ -390,8 +392,8 @@ class Koi {
       let ang = Math.atan2(P[i * 2 - 1] - P[i * 2 + 1], P[i * 2 - 2] - P[i * 2]);
       // Each joint bends only so far, so the body curves instead of folding.
       const bend = angleDiff(prevAng, ang);
-      if (bend > 0.17) ang = prevAng + 0.17;
-      else if (bend < -0.17) ang = prevAng - 0.17;
+      if (bend > 0.125) ang = prevAng + 0.125;
+      else if (bend < -0.125) ang = prevAng - 0.125;
       P[i * 2] = P[i * 2 - 2] - Math.cos(ang) * this.seg;
       P[i * 2 + 1] = P[i * 2 - 1] - Math.sin(ang) * this.seg;
       prevAng = ang;
@@ -699,6 +701,7 @@ class Pond {
     this.time = 0;
     this.koi = [];
     this.pellets = [];
+    this.letters = [];
     this.pads = [];
     this.drifters = [];
     this.motes = [];
@@ -976,12 +979,19 @@ class Pond {
       }
       this.feed(e.clientX, e.clientY);
     });
+    // Typing writes on the water; Enter scatters food.
     addEventListener("keydown", (e) => {
-      if (e.key !== "f" || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.target instanceof HTMLInputElement) return;
-      const x = ptr.inside ? ptr.x : rand(this.w * 0.3, this.w * 0.8);
-      const y = ptr.inside ? ptr.y : rand(this.h * 0.25, this.h * 0.7);
-      this.feed(x, y);
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target;
+      if (target instanceof HTMLElement && target.closest("a, button, input, textarea, [contenteditable]")) return;
+      if (e.key === "Enter") {
+        const x = ptr.inside ? ptr.x : rand(this.w * 0.45, this.w * 0.85);
+        const y = ptr.inside ? ptr.y : rand(this.h * 0.25, this.h * 0.7);
+        this.feed(x, y);
+        return;
+      }
+      if (e.key.length !== 1 || e.repeat) return;
+      this.write(e.key);
     });
     let resizeTimer = 0;
     addEventListener("resize", () => {
@@ -992,6 +1002,42 @@ class Pond {
         if (reducedMotion()) this.frame(0);
       }, 120);
     });
+  }
+
+  // Letters land where the cursor rests (or somewhere open), one after
+  // another like a line of type, then float off and dissolve.
+  write(ch) {
+    const { cw, ch: rowH } = this.grid;
+    const ptr = this.pointer;
+    const pen = this.pen;
+    const fresh = !pen || this.time - pen.last > 1.8 || (ptr.inside && Math.hypot(ptr.x - pen.ox, ptr.y - pen.oy) > 4);
+    if (fresh) {
+      let x = ptr.inside ? ptr.x + 14 : rand(this.w * 0.5, this.w * 0.75);
+      let y = ptr.inside ? ptr.y : rand(this.h * 0.2, this.h * 0.4);
+      const c = this.calm;
+      if (x > c.x0 && x < c.x1 && y > c.y0 && y < c.y1) {
+        x = c.x1 + 40;
+        y = clamp(y, 80, this.h - 80);
+      }
+      this.pen = { x, y, x0: x, ox: ptr.x, oy: ptr.y, last: this.time };
+    }
+    const p = this.pen;
+    p.last = this.time;
+    if (ch === " ") {
+      p.x += cw * 2.2;
+      return;
+    }
+    if (p.x > this.w - 40) {
+      p.x = p.x0;
+      p.y += rowH * 3;
+    }
+    const glyph = this.grid.glyph(ch);
+    if (glyph > 220) return;
+    this.letters.push({ glyph, x: p.x, y: p.y, vx: 0, vy: 0, age: 0, life: rand(8, 11) });
+    this.disturb(p.x, p.y, 0.9, 6);
+    this.sound.plip(0.25);
+    p.x += cw * 1.7;
+    if (reducedMotion()) this.frame(0);
   }
 
   feed(x, y) {
@@ -1140,6 +1186,30 @@ class Pond {
     }
     this.pellets = this.pellets.filter((f) => !f.eaten && f.age < 40);
 
+    // Written letters ride the ripples, and koi near the surface nibble them.
+    const { cw, ch, cols } = this.grid;
+    for (const l of this.letters) {
+      l.age += dt;
+      const i = Math.floor(l.y / ch) * cols + Math.floor(l.x / cw);
+      if (i > cols && i < this.cur.length - cols) {
+        l.vx -= (this.cur[i + 1] - this.cur[i - 1]) * 30 * dt;
+        l.vy -= (this.cur[i + cols] - this.cur[i - cols]) * 30 * dt;
+      }
+      l.vx = l.vx * Math.exp(-dt * 0.8) + 1.6 * dt;
+      l.vy *= Math.exp(-dt * 0.8);
+      l.x += l.vx * dt;
+      l.y += l.vy * dt;
+      for (const k of this.koi) {
+        if (k.z > 0.55 && k.fade > 0.5 && Math.hypot(k.x - l.x, k.y - l.y) < k.L * 0.08 + 6) {
+          l.eaten = true;
+          this.disturb(l.x, l.y, 1.2, 6);
+          break;
+        }
+      }
+      if (l.age > l.life) this.disturb(l.x, l.y, 0.5, 6);
+    }
+    this.letters = this.letters.filter((l) => !l.eaten && l.age <= l.life);
+
     // Lily pads sway on their stems.
     for (const p of this.pads) {
       p.vx += (p.ax - p.x) * 0.6 * dt;
@@ -1239,6 +1309,13 @@ class Pond {
     this.drawPads();
     this.drawPellets();
     this.drawDrifters();
+    for (const l of this.letters) {
+      const c = Math.floor(l.x / cw);
+      const r = Math.floor(l.y / ch);
+      if (c < 0 || r < 0 || c >= cols || r >= rows) continue;
+      const a = Math.min(1, l.age * 4) * clamp((l.life - l.age) / 3, 0, 1);
+      this.put(r * cols + c, l.glyph, this.pal.letter[clamp(Math.round(a * LEVELS), 1, LEVELS)], 1.25);
+    }
 
     // Motes: faint specks on the surface.
     for (const m of this.motes) {
