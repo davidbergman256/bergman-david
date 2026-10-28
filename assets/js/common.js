@@ -289,14 +289,16 @@ export function noise2(x, y) {
 export { hash2 };
 
 // Run fn every animation frame while the element is on screen and the tab
-// is visible. fn receives (dt seconds, t seconds).
-export function animateWhileVisible(el, fn) {
+// is visible. fn receives (dt seconds, t seconds). maxFps skips frames.
+export function animateWhileVisible(el, fn, { maxFps = 0 } = {}) {
   let visible = true;
   let raf = 0;
   let last = 0;
+  const minStep = maxFps ? 1 / maxFps - 0.002 : 0;
   const tick = (now) => {
     raf = 0;
     const t = now / 1000;
+    if (last && t - last < minStep) return schedule();
     const dt = last ? Math.min(0.05, t - last) : 1 / 60;
     last = t;
     fn(dt, t);

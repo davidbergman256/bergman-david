@@ -372,6 +372,27 @@ class Koi {
     } else {
       this.mode = "cruise";
       if (Math.random() < dt * 0.05) this.zTarget = rand(0.22, 0.92);
+      // Koi often trail one another in loose processions.
+      if (this.leader && (t > this.followUntil || this.leader.mode !== "cruise")) this.leader = null;
+      if (!this.leader && Math.random() < dt * 0.04) {
+        const options = p.koi.filter((o) => o !== this && o.leader !== this && o.fade > 0.5);
+        if (options.length) {
+          this.leader = options[Math.floor(Math.random() * options.length)];
+          this.followUntil = t + rand(8, 20);
+        }
+      }
+      if (this.leader) {
+        const o = this.leader;
+        const tx = o.pts[(o.N - 1) * 2] - Math.cos(o.heading) * o.L * 0.25;
+        const ty = o.pts[(o.N - 1) * 2 + 1] - Math.sin(o.heading) * o.L * 0.25;
+        const dx = tx - hx;
+        const dy = ty - hy;
+        const d = Math.hypot(dx, dy) || 1;
+        sx += (dx / d) * 1.3;
+        sy += (dy / d) * 1.3;
+        targetSpeed = clamp(o.speed * (d > this.L ? 1.25 : 0.9), 12 * scale, 70 * scale);
+        this.zTarget = lerp(this.zTarget, o.z, 0.02);
+      }
     }
 
     const desired = Math.atan2(sy, sx);
@@ -1549,5 +1570,7 @@ if (canvas) {
     pond.frame(0);
   });
   onMotionChange(() => pond.frame(0));
-  animateWhileVisible(canvas, (dt) => pond.frame(dt));
+  // Phones get half the frames; slow koi look the same and batteries last.
+  const coarse = matchMedia("(pointer: coarse)").matches;
+  animateWhileVisible(canvas, (dt) => pond.frame(dt), { maxFps: coarse ? 30 : 0 });
 }
