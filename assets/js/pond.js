@@ -28,7 +28,8 @@ const LEVELS = 12;
 
 const PALETTES = {
   light: {
-    shiro: "#848f89",
+    shiro: "#9aa49e",
+    outline: "#2a3430",
     hi: "#c4522c",
     sumi: "#262e2a",
     ki: "#bb8a27",
@@ -55,6 +56,7 @@ const PALETTES = {
   },
   dark: {
     shiro: "#e8e4d9",
+    outline: "",
     hi: "#ea6b3d",
     sumi: "#3b4642",
     ki: "#e6b34c",
@@ -648,7 +650,9 @@ class Koi {
           const ridge = !edge && as < 0.13 && bt > 0.3 && bt < 0.66;
           const glyph = edge || ridge ? p.stroke(Math.atan2(ny, nx) + Math.PI / 2) : p.gBody[band][scale ? 1 : 0];
           const a = Math.round(LEVELS * alpha * (edge ? 0.6 : ridge ? 0.5 : 0.42 + 0.58 * shade));
-          p.put(idx, glyph, p.pal[hue][clamp(a, 1, LEVELS)], zz);
+          // By day the outline is drawn in ink, the way a pen would.
+          const tone = edge && p.pal.outline ? "outline" : hue;
+          p.put(idx, glyph, p.pal[tone][clamp(a, 1, LEVELS)], zz);
           // Shadow on the floor.
           const sr = r + shadowDy;
           const sc = c + shadowDx;
@@ -869,6 +873,7 @@ class Pond {
     this.grid.resetColors();
     this.pal = {};
     for (const [name, hex] of Object.entries(src)) {
+      if (!hex) continue;
       const rgb = hexToRgb(hex);
       const levels = new Int16Array(LEVELS + 1);
       for (let l = 1; l <= LEVELS; l++) levels[l] = this.grid.color(rgba(rgb, l / LEVELS));
