@@ -569,6 +569,10 @@ a:hover {
     columns: 1;
   }
 
+  .stillwater canvas {
+    aspect-ratio: 4 / 3;
+  }
+
   .title-block {
     grid-template-columns: minmax(0, 1fr) auto;
   }

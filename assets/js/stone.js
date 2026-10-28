@@ -13,7 +13,7 @@ import {
   reducedMotion,
   rgba,
   typeCouplets,
-} from "./common.js?v=18";
+} from "./common.js?v=19";
 
 const LEVELS = 12;
 const STONE = " .:-=+*#%@";
@@ -53,7 +53,7 @@ class Stillwater {
     const { cols, rows } = g;
     this.waterY = Math.round(rows * 0.56);
     // The stone: sampled from the photo, sunk a little below the waterline.
-    const sw = Math.round(cols * 0.5);
+    const sw = Math.round(cols * (cols < 90 ? 0.7 : 0.5));
     const aspect = ((CROP.x1 - CROP.x0) * this.img.naturalWidth) / ((CROP.y1 - CROP.y0) * this.img.naturalHeight);
     const sh = Math.round((sw / aspect) * (g.cw / g.ch));
     const c = document.createElement("canvas");
@@ -112,7 +112,7 @@ class Stillwater {
     const i = r * s.w + c;
     if (s.mask[i] < 0.5) return -1;
     const v = clamp((s.lum[i] - s.lo) / (s.hi - s.lo || 1), 0, 1);
-    return this.dark ? 0.3 + 0.7 * v : 0.3 + 0.7 * (1 - v);
+    return this.dark ? 0.42 + 0.58 * v : 0.3 + 0.7 * (1 - v);
   }
 
   drop(x, y) {
