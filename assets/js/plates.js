@@ -2,7 +2,7 @@
 // project, animated while it's on screen. Each plate draws into a Sheet,
 // which keeps two layers (ink and accent) rendered as stacked <pre>s.
 
-import { animateWhileVisible, measureAdvance, noise2, reducedMotion, typeCouplets } from "./common.js?v=16";
+import { animateWhileVisible, measureAdvance, noise2, reducedMotion, typeCouplets } from "./common.js?v=17";
 
 class Sheet {
   constructor(cols, rows) {

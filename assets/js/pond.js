@@ -21,7 +21,7 @@ import {
   rgba,
   hexToRgb,
   typeCouplets,
-} from "./common.js?v=16";
+} from "./common.js?v=17";
 
 const TAU = Math.PI * 2;
 const LEVELS = 12;
@@ -913,7 +913,7 @@ class Pond {
     const order = [0, 1, 4, 2, 6, 3, 5];
     for (let i = 0; i < this.target; i++) this.spawn(VARIETIES[order[i % order.length]], i === 2);
     this.makePads(small);
-    const motes = Math.round(area / 26000);
+    const motes = Math.round(area / 52000);
     for (let i = 0; i < motes; i++) {
       this.motes.push({ x: rand(0, this.w), y: rand(0, this.h), s: Math.random() });
     }
