@@ -2,7 +2,7 @@
 // project, animated while it's on screen. Each plate draws into a Sheet,
 // which keeps two layers (ink and accent) rendered as stacked <pre>s.
 
-import { animateWhileVisible, measureAdvance, noise2, reducedMotion, typeCouplets } from "./common.js?v=15";
+import { animateWhileVisible, measureAdvance, noise2, reducedMotion, typeCouplets } from "./common.js?v=16";
 
 class Sheet {
   constructor(cols, rows) {
@@ -335,7 +335,7 @@ const PLATES = {
       }
       for (const [x, str] of [
         [2, "elevation"],
-        [52, "1:20"],
+        [48, "142 sq ft"],
       ])
         for (let i = 0; i < str.length; i++) add(x + i, 16, str[i]);
       state.marks = marks;
