@@ -803,7 +803,6 @@ class Pond {
     this.gComma = g.glyph(",");
     this.gTilde = g.glyph("~");
     this.gPellet = g.glyph("o");
-    this.gPadRim = g.glyph("o");
     this.gPadFill = g.glyph(".");
     this.gMoon = [..." .:-=+"].map((c) => g.glyph(c));
     this.gPadCore = g.glyph("+");
@@ -874,9 +873,10 @@ class Pond {
   makePads(small) {
     const count = small ? 2 : 3;
     const tries = 60;
+    const unit = clamp(Math.min(this.w, this.h * 1.5) * 0.21, 140, 270);
     for (let n = 0; n < count; n++) {
       for (let t = 0; t < tries; t++) {
-        const r = small ? rand(20, 30) : rand(28, 44);
+        const r = clamp(unit * rand(0.13, 0.19), 20, 54);
         const x = rand(r + 20, this.w - r - 20);
         const y = rand(r + 60, this.h - r - 40);
         const c = this.calm;

@@ -72,7 +72,7 @@ const ROWS = 17;
 const PLATES = {
   // Loomplane: agent streams are the warp, shared decisions the weft.
   // Now and then a stream falls behind a decision and is flagged stale.
-  loom(s, t) {
+  loom(s, t, state) {
     const labels = ["api", "ui", "db", "docs", "tests", "infra"];
     const warp = labels.map((_, i) => 7 + i * 10);
     labels.forEach((l, i) => s.text(warp[i] - Math.floor(l.length / 2), 0, l));
@@ -86,8 +86,12 @@ const PLATES = {
     const p = Math.floor(t * speed) % cycle;
     const done = Math.floor(p / width);
     const head = p % width;
-    const stale = 3;
-    const staleOn = done > stale && p > (stale + 1) * width + 70;
+    // A decision goes stale for one stream: on its own once per cycle, or
+    // whenever the drawing is clicked.
+    const flag = state.flag && t < state.flag.until ? state.flag : null;
+    const stale = flag ? Math.max(0, Math.min(done, count) - 1) : 3;
+    const lane = flag ? flag.lane : 1;
+    const staleOn = flag || (done > stale && p > (stale + 1) * width + 70);
     for (let y = top; y < top + count * 2; y++) for (const x of warp) s.put(x, y, "|");
     for (let r = 0; r < count; r++) {
       const y = top + 1 + r * 2;
@@ -96,7 +100,7 @@ const PLATES = {
       for (let k = 0; k < end; k++) {
         const x = 3 + k;
         const wi = warp.indexOf(x);
-        const isStale = staleOn && r === stale && x >= warp[1] - 4 && x <= warp[1] + 4;
+        const isStale = staleOn && r === stale && x >= warp[lane] - 4 && x <= warp[lane] + 4;
         if (wi >= 0) {
           if ((r + wi) % 2 === 0) s.put(x, y, isStale ? "!" : "-", isStale);
         } else {
@@ -107,12 +111,12 @@ const PLATES = {
     }
     const version = Math.min(done, count);
     s.text(2, 16, `decision v${version}`);
-    if (staleOn) s.text(COLS - 24, 16, `ui hasn't seen v${stale + 1}`.padStart(23), true);
+    if (staleOn) s.text(COLS - 24, 16, `${labels[lane]} hasn't seen v${stale + 1}`.padStart(23), true);
     else s.text(COLS - 24, 16, "every stream is current");
   },
 
   // BookTr: an English page becomes a Czech page, then a voice.
-  book(s, t) {
+  book(s, t, state) {
     const en = ["It was a quiet", "morning at the", "pond. The koi", "rose to meet", "the light."];
     const cs = ["Bylo tiché ráno", "u rybníka.", "Kapři stoupali", "vstříc světlu.", ""];
     const L = 3;
@@ -134,7 +138,7 @@ const PLATES = {
     s.hline(R, R + 26, 10, "_");
     en.forEach((line, i) => s.text(L + 3, 3 + i, line));
     const cycle = 11;
-    const phase = t % cycle;
+    const phase = (t - (state.offset ?? 0) + cycle) % cycle;
     const pool = "abcdeěščřžýáíéůnoprstuvy";
     let k = 0;
     cs.forEach((line, i) => {
@@ -164,7 +168,7 @@ const PLATES = {
   },
 
   // SocioAI: chat, a living sheet of deadlines, and a hub of resources.
-  socio(s, t) {
+  socio(s, t, state) {
     s.box(0, 0, 19, 15);
     s.box(22, 0, 43, 15);
     s.box(46, 0, 63, 15);
@@ -199,7 +203,7 @@ const PLATES = {
       ["school d", "jan 5"],
       ["school e", "feb 1"],
     ];
-    const ticked = Math.floor(t / 1.3) % (rows.length + 3);
+    const ticked = (Math.floor(t / 1.3) + (state.extra ?? 0)) % (rows.length + 3);
     rows.forEach(([name, due], i) => {
       const y = 4 + i * 2;
       s.text(24, y, name);
@@ -268,6 +272,7 @@ const PLATES = {
         d = 0;
         break;
       }
+      p.cur = [x, y];
       if (x === mx && y === my) arrived++;
       else s.put(x, y, "o", true);
     }
@@ -399,6 +404,40 @@ const PLATES = {
   },
 };
 
+// What a click does on each plate. (col, row) is the character clicked.
+const CLICKS = {
+  loom(state, col, row, t) {
+    state.flag = { lane: Math.floor(Math.random() * 6), until: t + 3.5 };
+  },
+  book(state, col, row, t) {
+    state.offset = t;
+  },
+  socio(state) {
+    state.extra = (state.extra ?? 0) + 1;
+  },
+  // Pick the corner nearest the click; everyone reroutes from where they are.
+  meet(state, col, row, t) {
+    if (!state.people) return;
+    const streetsY = [2, 8, 14];
+    const streetsX = [3, 15, 27, 39, 51, 61];
+    const nearest = (list, v) => list.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a));
+    const meet = [nearest(streetsX, col), nearest(streetsY, row)];
+    state.meet = meet;
+    state.start = t;
+    state.until = t + 9;
+    for (const p of state.people) {
+      const [x, y] = p.cur ?? p.path[0];
+      const onRow = streetsY.some((sy) => Math.abs(sy - y) < 0.01);
+      const corner = onRow ? [meet[0], y] : [x, meet[1]];
+      p.path = [[x, y], corner, meet];
+    }
+  },
+  room(state, col, row, t) {
+    if (!state.people || state.people.length >= 12) return;
+    state.people.push({ x: 31, y: 14, tx: 31, ty: 11, next: t + 1.5 });
+  },
+};
+
 // ------------------------------------------------------------------- boot
 
 typeCouplets(document.querySelector("[data-couplet]"), ["things i've made."]);
@@ -436,4 +475,17 @@ for (const plate of document.querySelectorAll("[data-plate]")) {
       local = 0;
     }
   });
+  const click = CLICKS[plate.dataset.plate];
+  const drawing = plate.querySelector(".drawing");
+  if (click && drawing) {
+    drawing.classList.add("is-interactive");
+    drawing.addEventListener("click", (e) => {
+      const r = ink.getBoundingClientRect();
+      const col = Math.floor(((e.clientX - r.left) / r.width) * COLS);
+      const row = Math.floor(((e.clientY - r.top) / r.height) * ROWS);
+      const now = reducedMotion() ? 8 : local;
+      click(state, col, row, now);
+      paint(now);
+    });
+  }
 }

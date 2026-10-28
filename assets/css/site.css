@@ -353,6 +353,10 @@ a:hover {
   overflow: hidden;
 }
 
+.drawing.is-interactive {
+  cursor: pointer;
+}
+
 /* Ink and accent layers sit in the same cell, so they always align. */
 .drawing pre {
   grid-area: 1 / 1;
