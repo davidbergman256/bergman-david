@@ -181,7 +181,7 @@ class Stillwater {
         const dx = this.sway(c, r);
         const sc = Math.round(c - this.sx + dx);
         const v = this.stoneAt(sc, Math.round(src - this.sy));
-        if (v >= 0 && (r + c) % 7 !== 0) {
+        if (v >= 0 && noise2(c * 0.55, r * 0.8 + this.time * 0.4) > 0.24) {
           const gi = clamp(Math.round(v * (REFLECT.length - 1)), 1, REFLECT.length - 1);
           const a = Math.round(v * fade * 9);
           if (a > 0) g.draw(this.gReflect[gi], this.pal.stone[a], c, r);

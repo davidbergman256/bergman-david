@@ -221,10 +221,19 @@ const PLATES = {
     for (const y of streetsY) s.hline(0, COLS - 1, y, "-");
     for (const x of streetsX) s.vline(x, 0, ROWS - 1, "|");
     for (const y of streetsY) for (const x of streetsX) s.put(x, y, "+");
-    // Quiet blocks with the odd building.
-    for (let y = 0; y < ROWS; y++)
-      for (let x = 0; x < COLS; x++)
-        if (s.get(x, y) === " " && noise2(x * 0.7, y * 0.9) > 0.8) s.put(x, y, ".");
+    // City blocks: a light hatch inset from the streets, a few left as parks.
+    for (let j = 0; j < streetsY.length - 1; j++) {
+      for (let i = 0; i < streetsX.length - 1; i++) {
+        const park = noise2(i * 1.7, j * 2.3) > 0.62;
+        for (let y = streetsY[j] + 2; y <= streetsY[j + 1] - 2; y++) {
+          for (let x = streetsX[i] + 2; x <= streetsX[i + 1] - 2; x++) {
+            if (park) {
+              if ((x * 3 + y * 5) % 7 === 0) s.put(x, y, "*");
+            } else if ((x + y) % 2 === 0) s.put(x, y, ".");
+          }
+        }
+      }
+    }
     if (!state.people || t > state.until) {
       const pick = (a) => a[Math.floor(Math.random() * a.length)];
       const meet = [pick(streetsX.slice(1, -1)), pick(streetsY)];

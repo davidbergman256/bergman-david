@@ -3,7 +3,7 @@
 
 import { AsciiCanvas, clamp, cssVar, currentTheme, fontsReady, hexToRgb, onThemeChange, reducedMotion, rgba, typeCouplets } from "./common.js";
 
-const RAMP = " .,:;-=+*x#%@";
+const RAMP = " .,:;-=+*x#%";
 const LEVELS = 10;
 
 class Photo {
@@ -149,10 +149,12 @@ class Photo {
         ctx.fillRect(Math.floor(c * cw * dpr), Math.floor(r * ch * dpr), Math.ceil(cw * dpr) + 1, Math.ceil(ch * dpr) + 1);
         ctx.globalAlpha = 1;
         const v = this.lum[r * cols + c];
-        const density = this.dark ? v : 1 - v;
+        // A gentle curve keeps most of the frame light; only the deepest
+        // tones reach the heavy glyphs.
+        const density = Math.pow(this.dark ? v : 1 - v, 1.35);
         const gi = Math.round(density * (RAMP.length - 1));
         if (gi === 0) continue;
-        const level = clamp(Math.round((0.35 + 0.65 * density) * LEVELS * k), 1, LEVELS);
+        const level = clamp(Math.round((0.28 + 0.62 * density) * LEVELS * k), 1, LEVELS);
         g.draw(this.glyphs[gi], this.ink[level], c, r);
       }
     }

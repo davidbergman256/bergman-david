@@ -527,6 +527,7 @@ class Koi {
   }
 
   raster() {
+    if (this.fade < 0.02) return;
     const p = this.pond;
     const { cw, ch, cols, rows } = p.grid;
     const R = this.rnd;
@@ -680,6 +681,7 @@ class Koi {
 
   // Rough hit test for the hover label.
   contains(x, y) {
+    if (this.fade < 0.4) return false;
     const R = this.rnd;
     for (let i = 0; i < this.N; i++) {
       const d = Math.hypot(R[i * 2] - x, R[i * 2 + 1] - y);
@@ -1030,8 +1032,19 @@ class Pond {
     this.updateHud();
   }
 
+  // The page opens on still water; the koi rise into view one at a time.
+  entrance() {
+    this.koi.forEach((k, i) => {
+      k.fade = 0;
+      k.delay = 0.4 + i * 0.55;
+      k.z = 0.05;
+    });
+    this.updateHud();
+  }
+
   updateHud() {
-    if (this.hud.koi) this.hud.koi.textContent = String(this.koi.length);
+    const seen = this.koi.filter((k) => !(k.delay > 0)).length;
+    if (this.hud.koi) this.hud.koi.textContent = String(seen);
     if (this.hud.fed) this.hud.fed.textContent = String(this.fedNow);
   }
 
@@ -1104,10 +1117,18 @@ class Pond {
     }
     if (steps === 3) this.simAcc = 0;
 
+    let rising = false;
     for (const k of this.koi) {
       k.update(dt);
-      if (k.fade < 1) k.fade = Math.min(1, k.fade + dt * 0.25);
+      if (k.delay > 0) {
+        k.delay -= dt;
+        k.z = 0.05;
+        if (k.delay <= 0) rising = true;
+      } else if (k.fade < 1) {
+        k.fade = Math.min(1, k.fade + dt * 0.3);
+      }
     }
+    if (rising) this.updateHud();
 
     // Food floats, drifts, and eventually sinks.
     for (const f of this.pellets) {
@@ -1443,6 +1464,8 @@ if (canvas) {
   // Settle the koi into natural curves before the first frame.
   for (let i = 0; i < 90; i++) pond.update(1 / 30);
   pond.time = 0;
+  pond.nextDrip = 2.5;
+  if (!reducedMotion()) pond.entrance();
   pond.frame(0);
   onThemeChange(() => {
     pond.palette();

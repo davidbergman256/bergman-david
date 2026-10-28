@@ -238,10 +238,10 @@ a:hover {
   content: "";
   position: absolute;
   z-index: -1;
-  inset: -22px -40px -18px -36px;
-  border-radius: 48px;
+  inset: -18px -36px -14px -30px;
+  border-radius: 50%;
   background: var(--fog);
-  filter: blur(22px);
+  filter: blur(34px);
   pointer-events: none;
 }
 
