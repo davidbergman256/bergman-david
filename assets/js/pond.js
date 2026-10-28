@@ -642,10 +642,12 @@ class Koi {
           if (sheen > 0) band = Math.max(0, band - 1);
           if (sheen < 0) band = Math.min(2, band + 1);
           const scale = hash2(Math.floor((bt * this.L) / 7 + this.seed), Math.floor(s * 3) + 50) < 0.22;
-          // The outermost cells trace the outline with strokes along the body.
+          // The outermost cells trace the outline with strokes along the body;
+          // a dorsal ridge runs down the middle of the back.
           const edge = as > 0.84 && bt > 0.06;
-          const glyph = edge ? p.stroke(Math.atan2(ny, nx) + Math.PI / 2) : p.gBody[band][scale ? 1 : 0];
-          const a = Math.round(LEVELS * alpha * (edge ? 0.6 : 0.42 + 0.58 * shade));
+          const ridge = !edge && as < 0.13 && bt > 0.3 && bt < 0.66;
+          const glyph = edge || ridge ? p.stroke(Math.atan2(ny, nx) + Math.PI / 2) : p.gBody[band][scale ? 1 : 0];
+          const a = Math.round(LEVELS * alpha * (edge ? 0.6 : ridge ? 0.5 : 0.42 + 0.58 * shade));
           p.put(idx, glyph, p.pal[hue][clamp(a, 1, LEVELS)], zz);
           // Shadow on the floor.
           const sr = r + shadowDy;
@@ -686,10 +688,21 @@ class Koi {
       }
     }
 
-    // Eyes.
+    // Eyes, and the two barbels at the mouth.
     const ex = R[0];
     const ey = R[1];
     const fwd = Math.atan2(R[1] - R[3], R[0] - R[2]);
+    for (const sd of [-1, 1]) {
+      const a = fwd + sd * 0.55 + Math.sin(p.time * 2 + this.seed + sd) * 0.15;
+      const reach = bodyWidth(0) * this.W + 5;
+      const bx = ex + Math.cos(a) * reach;
+      const by = ey + Math.sin(a) * reach;
+      const c = Math.floor(bx / cw);
+      const r = Math.floor(by / ch);
+      if (c >= 0 && r >= 0 && c < cols && r < rows) {
+        p.put(r * cols + c, p.stroke(a), p.pal[this.variety.fin][clamp(Math.round(LEVELS * alpha * 0.45), 1, LEVELS)], zz - 0.002);
+      }
+    }
     for (const sd of [-1, 1]) {
       const a = fwd + (sd * Math.PI) / 2;
       const px = ex + Math.cos(fwd) * -this.L * 0.035 + Math.cos(a) * this.W * 0.42;
@@ -769,12 +782,12 @@ class Pond {
     this.prev = new Float32Array(n);
     this.offX = new Float32Array(n);
     this.offY = new Float32Array(n);
+    // A sparse scatter of pebbles, fixed to the grid.
+    this.pebbles = [];
+    for (let i = 0; i < n; i++) if (hash2(i % this.grid.cols, (i / this.grid.cols) | 0) < 0.005) this.pebbles.push(i);
     this.glyphs();
-    const intro = document.querySelector(".intro");
-    const r = intro?.getBoundingClientRect();
-    this.calm = r
-      ? { x0: r.left - 30, y0: r.top - 30, x1: r.right + 30, y1: r.bottom + 30 }
-      : { x0: 0, y0: 0, x1: 0, y1: 0 };
+    this.haze = new Uint8Array(n);
+    this.measureCalm();
     if (oldW && (oldW !== w || oldH !== h)) {
       for (const k of this.koi) {
         const sx = w / oldW;
@@ -787,6 +800,42 @@ class Pond {
       for (const pad of this.pads) {
         pad.ax *= w / oldW;
         pad.ay *= h / oldH;
+      }
+    }
+  }
+
+  // Where the text sits. Koi drift out from under it, and the water there
+  // is hazy: whatever passes is drawn faintly, with a softer band around
+  // the edge (haze 1 = band, 2 = under the text).
+  measureCalm() {
+    const r = document.querySelector(".intro")?.getBoundingClientRect();
+    this.calm = r
+      ? { x0: r.left - 30, y0: r.top - 30, x1: r.right + 30, y1: r.bottom + 30 }
+      : { x0: 0, y0: 0, x1: 0, y1: 0 };
+    this.haze.fill(0);
+    const { cols, rows, cw, ch } = this.grid;
+    // The nav and the counts get the same courtesy, with a tighter margin.
+    const areas = [
+      [r, 10, 34],
+      [document.querySelector(".nav")?.getBoundingClientRect(), 2, 14],
+      [document.querySelector(".pond-hud")?.getBoundingClientRect(), 2, 14],
+    ];
+    for (const [rect, inner, outer] of areas) {
+      if (!rect) continue;
+      const c0 = Math.max(0, Math.floor((rect.left - outer) / cw));
+      const c1 = Math.min(cols - 1, Math.ceil((rect.right + outer) / cw));
+      const r0 = Math.max(0, Math.floor((rect.top - outer) / ch));
+      const r1 = Math.min(rows - 1, Math.ceil((rect.bottom + outer) / ch));
+      for (let row = r0; row <= r1; row++) {
+        for (let c = c0; c <= c1; c++) {
+          const x = (c + 0.5) * cw;
+          const y = (row + 0.5) * ch;
+          const dx = Math.max(rect.left - x, 0, x - rect.right);
+          const dy = Math.max(rect.top - y, 0, y - rect.bottom);
+          const d = Math.max(dx, dy * 1.4);
+          const i = row * cols + c;
+          this.haze[i] = Math.max(this.haze[i], d < inner ? 2 : d < outer ? 1 : 0);
+        }
       }
     }
   }
@@ -804,6 +853,7 @@ class Pond {
     this.gTilde = g.glyph("~");
     this.gPellet = g.glyph("o");
     this.gPadFill = g.glyph(".");
+    this.gPebble = [..."o.,.'.,"].map((c) => g.glyph(c));
     this.gMoon = [..." .:-=+"].map((c) => g.glyph(c));
     this.gPadCore = g.glyph("+");
     this.gLotus = [..."*@o"].map((c) => g.glyph(c));
@@ -823,6 +873,16 @@ class Pond {
       const levels = new Int16Array(LEVELS + 1);
       for (let l = 1; l <= LEVELS; l++) levels[l] = this.grid.color(rgba(rgb, l / LEVELS));
       this.pal[name] = levels;
+    }
+    // For each colour, the same hue fainter: once for the haze's edge,
+    // more for under the text.
+    const count = this.grid.colors.length;
+    this.hazeMap = [null, new Int16Array(count), new Int16Array(count)];
+    for (const levels of Object.values(this.pal)) {
+      for (let l = 1; l <= LEVELS; l++) {
+        this.hazeMap[1][levels[l]] = levels[Math.max(1, Math.round(l * 0.5))];
+        this.hazeMap[2][levels[l]] = levels[Math.max(1, Math.round(l * 0.2))];
+      }
     }
   }
 
@@ -1014,6 +1074,20 @@ class Pond {
       if (e.key.length !== 1 || e.repeat) return;
       this.write(e.key);
     });
+    // On short screens the text can scroll; the haze follows it.
+    let scrollQueued = false;
+    addEventListener(
+      "scroll",
+      () => {
+        if (scrollQueued) return;
+        scrollQueued = true;
+        requestAnimationFrame(() => {
+          scrollQueued = false;
+          this.measureCalm();
+        });
+      },
+      { passive: true },
+    );
     let resizeTimer = 0;
     addEventListener("resize", () => {
       clearTimeout(resizeTimer);
@@ -1338,6 +1412,14 @@ class Pond {
       this.put(r * cols + c, l.glyph, this.pal.letter[clamp(Math.round(a * LEVELS), 1, LEVELS)], 1.25);
     }
 
+    // Pebbles on the floor, seen through the water: ripples make them sway.
+    for (const i of this.pebbles) {
+      const c = (i % cols) + Math.round((this.offX[i] * 1.6) / cw);
+      const r = ((i / cols) | 0) + Math.round((this.offY[i] * 1.6) / ch);
+      if (c < 0 || r < 0 || c >= cols || r >= rows) continue;
+      this.put(r * cols + c, this.gPebble[i % 7], this.pal.mote[1], 0.005);
+    }
+
     // Motes: faint specks on the surface.
     for (const m of this.motes) {
       const c = Math.floor(m.x / cw);
@@ -1377,9 +1459,11 @@ class Pond {
     }
 
     g.clear();
+    const haze = this.haze;
     for (let i = 0; i < n; i++) {
       if (this.zBuf[i] < 0) continue;
-      g.draw(this.gBuf[i], this.cBuf[i], i % cols, (i / cols) | 0);
+      const c = haze[i] ? this.hazeMap[haze[i]][this.cBuf[i]] : this.cBuf[i];
+      g.draw(this.gBuf[i], c, i % cols, (i / cols) | 0);
     }
   }
 

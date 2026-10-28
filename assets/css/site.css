@@ -14,7 +14,6 @@
   --rule: rgba(30, 38, 34, 0.14);
   --accent: #b9502c;
   --select: rgba(185, 80, 44, 0.16);
-  --fog: rgba(230, 233, 227, 0.86);
   color-scheme: light;
 }
 
@@ -26,7 +25,6 @@
   --rule: rgba(213, 219, 210, 0.11);
   --accent: #e2794a;
   --select: rgba(226, 121, 74, 0.22);
-  --fog: rgba(15, 23, 21, 0.84);
   color-scheme: dark;
 }
 
@@ -223,7 +221,6 @@ a:hover {
   align-content: end;
   min-height: 100svh;
   padding: 120px var(--gutter) max(14vh, 64px) clamp(24px, 14vw, 232px);
-  overflow: clip;
   pointer-events: none;
 }
 
@@ -231,18 +228,6 @@ a:hover {
   position: relative;
   max-width: 54ch;
   pointer-events: auto;
-}
-
-/* A mist over the water behind the text: koi passing under it fade out. */
-.intro::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -18px -36px -14px -30px;
-  border-radius: 50%;
-  background: var(--fog);
-  filter: blur(34px);
-  pointer-events: none;
 }
 
 .couplet {
@@ -552,16 +537,20 @@ a:hover {
 
   .pond-hud {
     top: auto;
-    bottom: 18px;
+    bottom: 16px;
+    left: var(--gutter);
+    grid-template-columns: repeat(3, auto auto);
+    justify-content: start;
+    column-gap: 8px;
+  }
+
+  .pond-hud dd {
+    margin-right: 14px;
   }
 
   .home {
     padding-left: var(--gutter);
-    padding-bottom: 72px;
-  }
-
-  .intro::before {
-    inset: -18px -16px -14px -16px;
+    padding-bottom: 64px;
   }
 
   .photos {
