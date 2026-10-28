@@ -47,6 +47,7 @@ const PALETTES = {
     leaf0: "#b0512b",
     leaf1: "#c48728",
     leaf2: "#8c4b2b",
+    moon: "#ffffff",
     snow: "#8fa2ab",
     petal: "#d4869c",
     firefly: "#b8902f",
@@ -71,6 +72,7 @@ const PALETTES = {
     leaf0: "#d4683a",
     leaf1: "#dfa641",
     leaf2: "#b56340",
+    moon: "#f1ead0",
     snow: "#e2ebef",
     petal: "#eeaabd",
     firefly: "#f3d77e",
@@ -129,6 +131,80 @@ function storageSet(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {}
 }
+
+// ------------------------------------------------------------------- sound
+
+// Off until asked for. Koi pluck notes from a pentatonic scale when they
+// eat, pizzicato, lower for bigger fish; food lands with a small plip.
+class Sound {
+  constructor() {
+    this.on = false;
+    this.ctx = null;
+  }
+
+  toggle() {
+    this.on = !this.on;
+    if (this.on && !this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return (this.on = false);
+      this.ctx = new AC();
+      this.out = this.ctx.createGain();
+      this.out.gain.value = 0.5;
+      this.out.connect(this.ctx.destination);
+    }
+    if (this.on) this.ctx.resume();
+    return this.on;
+  }
+
+  pluck(freq) {
+    if (!this.on) return;
+    const c = this.ctx;
+    const t = c.currentTime;
+    const filter = c.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(freq * 6, t);
+    filter.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 0.4);
+    const gain = c.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.22, t + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+    filter.connect(gain).connect(this.out);
+    for (const [type, detune, level] of [
+      ["triangle", 0, 1],
+      ["sawtooth", 6, 0.18],
+    ]) {
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      o.detune.value = detune;
+      g.gain.value = level;
+      o.connect(g).connect(filter);
+      o.start(t);
+      o.stop(t + 1);
+    }
+  }
+
+  plip(strength = 1) {
+    if (!this.on) return;
+    const c = this.ctx;
+    const t = c.currentTime;
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(1100 + Math.random() * 300, t);
+    o.frequency.exponentialRampToValueAtTime(320, t + 0.09);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.09 * strength, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    o.connect(g).connect(this.out);
+    o.start(t);
+    o.stop(t + 0.2);
+  }
+}
+
+// D major pentatonic, two octaves.
+const SCALE = [293.66, 329.63, 369.99, 440, 493.88, 587.33, 659.25, 739.99, 880];
 
 // ------------------------------------------------------------------- koi
 
@@ -635,6 +711,14 @@ class Pond {
       fed: document.querySelector("[data-fed-count]"),
     };
     this.label = document.querySelector("[data-koi-label]");
+    this.sound = new Sound();
+    const soundButton = document.querySelector("[data-sound]");
+    soundButton?.addEventListener("click", () => {
+      const on = this.sound.toggle();
+      soundButton.textContent = on ? "on" : "off";
+      soundButton.setAttribute("aria-pressed", String(on));
+      if (on) this.sound.pluck(SCALE[4]);
+    });
     this.grid = new AsciiCanvas(canvas, { fontSize: 10, lineHeight: 0.9, tracking: 0 });
     this.layout();
     this.palette();
@@ -694,10 +778,11 @@ class Pond {
     this.gTilde = g.glyph("~");
     this.gPellet = g.glyph("o");
     this.gPadRim = g.glyph("o");
-    this.gPadFill = g.glyph(":");
+    this.gPadFill = g.glyph(".");
+    this.gMoon = [..." .:-=+"].map((c) => g.glyph(c));
     this.gPadCore = g.glyph("+");
     this.gLotus = [..."*@o"].map((c) => g.glyph(c));
-    this.gLeaf = ["❦", "❧"].map((c) => g.glyph(c));
+    this.gLeaf = g.glyph("%");
     this.gPetal = g.glyph("*");
     this.gStar = g.glyph("*");
   }
@@ -746,7 +831,7 @@ class Pond {
   }
 
   spawn(variety, butterfly = false, fadeIn = false) {
-    const unit = clamp(Math.min(this.w, this.h * 1.5) * 0.27, 150, 320);
+    const unit = clamp(Math.min(this.w, this.h * 1.5) * 0.21, 140, 270);
     const len = unit * rand(0.78, 1.12) * (variety.name === "chagoi" ? 1.12 : 1);
     const x = rand(this.w * 0.12, this.w * 0.88);
     const y = rand(this.h * 0.15, this.h * 0.85);
@@ -922,12 +1007,18 @@ class Pond {
       });
     }
     this.disturb(x, y, 3.2, 11);
+    this.sound.plip();
     if (reducedMotion()) this.frame(0);
   }
 
   eat(koi, pellet) {
     this.disturb(pellet.x, pellet.y, 1.4, 7);
     koi.beat += 1.2;
+    // Each koi keeps to its own register: the bigger, the lower.
+    const lengths = this.koi.map((k) => k.L).sort((a, b) => b - a);
+    const rank = lengths.indexOf(koi.L) / Math.max(1, lengths.length - 1);
+    const step = Math.round(rank * 5) + Math.floor(Math.random() * 3);
+    this.sound.pluck(SCALE[clamp(step, 0, SCALE.length - 1)]);
     this.fedNow++;
     this.fedTotal++;
     storageSet("pond.fed", this.fedTotal);
@@ -998,6 +1089,7 @@ class Pond {
         const y = rand(80, this.h - 40);
         if (x > c.x0 && x < c.x1 && y > c.y0 && y < c.y1) continue;
         this.disturb(x, y, 1.6, 6);
+        this.sound.plip(0.3);
         break;
       }
       this.nextDrip = t + rand(5, 12);
@@ -1137,6 +1229,8 @@ class Pond {
       this.put(r * cols + c, m.s > 0.5 ? this.gDot : this.gTick, this.pal.mote[a], 0.01);
     }
 
+    if (this.theme === "dark") this.drawMoon();
+
     // Water fills whatever is still empty.
     const h = this.cur;
     const water = this.pal.water;
@@ -1186,19 +1280,23 @@ class Pond {
           if (d > p.r) continue;
           const ang = Math.atan2(dy, dx);
           const local = angleDiff(p.rot, ang);
-          if (Math.abs(local) < 0.2 && d > p.r * 0.12) continue;
+          // The slit runs from the rim to the centre; its edges are drawn too.
+          const slit = Math.abs(local);
+          if (slit < 0.16 && d > p.r * 0.1) continue;
           let glyph;
           let color;
-          if (d > p.r * 0.8) {
-            glyph = this.gPadRim;
-            color = this.pal.padRim[10];
-          } else if (d < p.r * 0.14) {
+          const rim = d > p.r - Math.max(5, p.r * 0.16);
+          if (rim || (slit < 0.3 && d > p.r * 0.12)) {
+            // Outline: strokes along the edge, like a pen around a coin.
+            glyph = rim ? this.stroke(ang + Math.PI / 2) : this.stroke(ang);
+            color = this.pal.padRim[rim ? 11 : 9];
+          } else if (d < p.r * 0.13) {
             glyph = this.gPadCore;
-            color = this.pal.padRim[9];
+            color = this.pal.padRim[10];
           } else {
-            const vein = Math.abs(((local / TAU) * 9 + 0.5) % 1 - 0.5) < 0.12;
+            const vein = Math.abs(((local / TAU) * 11 + 0.5) % 1 - 0.5) < 0.09;
             glyph = vein ? this.stroke(ang) : this.gPadFill;
-            color = this.pal.pad[vein ? 11 : 8];
+            color = this.pal.pad[vein ? 9 : 5];
           }
           this.put(i, glyph, color, 1.2);
         }
@@ -1223,6 +1321,31 @@ class Pond {
           if (c < 0 || r < 0 || c >= cols || r >= rows) continue;
           this.put(r * cols + c, this.gLotus[gi], this.pal[hue][gi === 2 ? 8 : 12], 1.3);
         }
+      }
+    }
+  }
+
+  // At night the moon lies on the water. Ripples bend it and break it up.
+  drawMoon() {
+    const { cols, rows, cw, ch } = this.grid;
+    const R = clamp(this.w * 0.032, 24, 44);
+    const mx = this.w * 0.8;
+    const my = this.h * 0.26;
+    const c0 = Math.max(1, Math.floor((mx - R * 1.6) / cw));
+    const c1 = Math.min(cols - 2, Math.ceil((mx + R * 1.6) / cw));
+    const r0 = Math.max(1, Math.floor((my - R * 1.6) / ch));
+    const r1 = Math.min(rows - 2, Math.ceil((my + R * 1.6) / ch));
+    for (let r = r0; r <= r1; r++) {
+      for (let c = c0; c <= c1; c++) {
+        const i = r * cols + c;
+        const px = (c + 0.5) * cw + this.offX[i] * 3.5;
+        const py = (r + 0.5) * ch + this.offY[i] * 3.5;
+        const d = Math.hypot(px - mx, py - my) / R;
+        if (d > 1) continue;
+        const streak = noise2(c * 0.45, r * 1.4 + this.time * 0.25);
+        const b = Math.sqrt(1 - d * d) * (0.55 + 0.45 * streak);
+        if (b < 0.12) continue;
+        this.put(i, this.gMoon[clamp(Math.round(b * 5.4), 1, 5)], this.pal.moon[clamp(Math.round(1 + b * 7), 1, LEVELS)], 0.014);
       }
     }
   }
@@ -1266,14 +1389,33 @@ class Pond {
       }
       const hue = d.kind === "petal" ? "petal" : `leaf${d.hue}`;
       const a = clamp(Math.round(LEVELS * fadeOut), 1, LEVELS);
-      const glyph = d.kind === "leaf" ? this.gLeaf[d.seed > 50 ? 0 : 1] : this.gPetal;
-      at(x, y, glyph, this.pal[hue][a], 1.4);
-      // A stem trails a leaf as it turns.
-      if (d.kind === "leaf") {
-        const sx = x - Math.cos(d.rot) * 7;
-        const sy = y - Math.sin(d.rot) * 7;
-        at(sx, sy, this.stroke(d.rot), this.pal[hue][Math.max(1, a - 4)], 1.39);
+      if (d.kind === "petal") {
+        at(x, y, this.gPetal, this.pal[hue][a], 1.4);
+        continue;
       }
+      // A leaf: a small outlined ellipse with a midrib and a stem, a little
+      // larger while it's still in the air.
+      const len = 15 + lift * 6;
+      const wid = 6.5 + lift * 2.5;
+      const ux = Math.cos(d.rot);
+      const uy = Math.sin(d.rot);
+      const c0 = Math.floor((x - len) / cw);
+      const c1 = Math.ceil((x + len) / cw);
+      const r0 = Math.floor((y - len) / ch);
+      const r1 = Math.ceil((y + len) / ch);
+      for (let r = r0; r <= r1; r++) {
+        for (let c = c0; c <= c1; c++) {
+          const px = (c + 0.5) * cw - x;
+          const py = (r + 0.5) * ch - y;
+          const u = (px * ux + py * uy) / len;
+          const v = (-px * uy + py * ux) / wid;
+          const e = u * u + v * v;
+          if (e > 1) continue;
+          const glyph = e > 0.55 ? this.stroke(d.rot + (v > 0 ? 0.35 : -0.35) * Math.sign(u || 1)) : Math.abs(v) < 0.3 ? this.stroke(d.rot) : this.gLeaf;
+          at((c + 0.5) * cw, (r + 0.5) * ch, glyph, this.pal[hue][a], 1.4);
+        }
+      }
+      at(x - ux * (len + 4), y - uy * (len + 4), this.stroke(d.rot + 0.4), this.pal[hue][Math.max(1, a - 3)], 1.39);
     }
   }
 

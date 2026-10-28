@@ -27,8 +27,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans+Mono:ital,wght@0,300..700;1,300..700&display=swap" />
-    <link rel="stylesheet" href="/assets/css/site.css?v=2" />
-    <script type="module" src="/assets/js/pond.js?v=2"></script>
+    <link rel="stylesheet" href="/assets/css/site.css?v=3" />
+    <script type="module" src="/assets/js/pond.js?v=3"></script>
   </head>
   <body>
     <nav class="nav" aria-label="Main">
@@ -44,11 +44,13 @@
 
     <canvas class="pond-canvas" aria-hidden="true" data-pond></canvas>
 
-    <dl class="pond-hud" aria-hidden="true">
+    <dl class="pond-hud">
       <dt>koi</dt>
       <dd data-koi-count>0</dd>
       <dt>fed</dt>
       <dd data-fed-count>0</dd>
+      <dt>sound</dt>
+      <dd><button class="text-button" type="button" data-sound aria-pressed="false" aria-label="Sound">off</button></dd>
     </dl>
     <div class="koi-label" data-koi-label aria-hidden="true"></div>
 

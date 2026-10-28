@@ -184,6 +184,11 @@ a:hover {
   text-align: right;
 }
 
+.pond-hud button {
+  pointer-events: auto;
+  text-decoration-color: var(--faint);
+}
+
 .pond-hud dt {
   margin: 0;
 }
