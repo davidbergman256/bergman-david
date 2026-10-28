@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Blog · David Bergman</title>
+    <meta name="description" content="David Bergman's blog. Coming soon." />
+    <link rel="canonical" href="https://bergmandavid.com/blog/" />
+    <meta property="og:title" content="Blog, David Bergman" />
+    <meta property="og:description" content="Coming soon." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bergmandavid.com/blog/" />
+    <meta property="og:image" content="https://bergmandavid.com/assets/photos/stone.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#e6e9e3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1715" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <script>
+      (() => {
+        let t;
+        try { t = localStorage.getItem("theme"); } catch {}
+        if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans+Mono:ital,wght@0,300..700;1,300..700&display=swap" />
+    <link rel="stylesheet" href="/assets/css/site.css?v=2" />
+    <script type="module" src="/assets/js/stone.js?v=2"></script>
+  </head>
+  <body>
+    <nav class="nav" aria-label="Main">
+      <a href="/">pond</a>
+      <a href="/projects/">projects</a>
+      <a href="/photos/">photos</a>
+      <a href="/blog/" aria-current="page">blog</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme">
+        <svg class="sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="2.9" /><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" /></svg>
+        <svg class="moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" aria-hidden="true"><path d="M13.6 10.1A5.9 5.9 0 0 1 5.9 2.4a5.9 5.9 0 1 0 7.7 7.7Z" /></svg>
+      </button>
+    </nav>
+
+    <main class="stillwater">
+      <div class="stillwater-scene">
+        <canvas data-stillwater role="img" aria-label="A stone resting at the waterline, its reflection rippling below."></canvas>
+        <h1 class="couplet" data-couplet aria-label="coming soon."><span data-couplet-text>coming soon.</span><span class="caret" aria-hidden="true"></span></h1>
+      </div>
+    </main>
+  </body>
+</html>

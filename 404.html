@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Not found · David Bergman</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <script>
+      (() => {
+        let t;
+        try { t = localStorage.getItem("theme"); } catch {}
+        if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans+Mono:ital,wght@0,300..700;1,300..700&display=swap" />
+    <link rel="stylesheet" href="/assets/css/site.css?v=2" />
+    <script type="module" src="/assets/js/common.js?v=2"></script>
+  </head>
+  <body>
+    <nav class="nav" aria-label="Main">
+      <a href="/">pond</a>
+      <a href="/projects/">projects</a>
+      <a href="/photos/">photos</a>
+      <a href="/blog/">blog</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme">
+        <svg class="sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="2.9" /><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" /></svg>
+        <svg class="moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" aria-hidden="true"><path d="M13.6 10.1A5.9 5.9 0 0 1 5.9 2.4a5.9 5.9 0 1 0 7.7 7.7Z" /></svg>
+      </button>
+    </nav>
+
+    <main class="stillwater">
+      <div class="empty-water">
+        <pre class="ring" aria-hidden="true">
+            .  -  ~  -  .
+       .  ~               ~  .
+     -                         -
+    ~             .             ~
+     -                         -
+       '  ~               ~  '
+            '  -  ~  -  '</pre>
+        <h1>Nothing swims here.</h1>
+        <p>This page doesn't exist, or it moved. <a href="/">Back to the pond</a>.</p>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Projects · David Bergman</title>
+    <meta name="description" content="Things David Bergman has made: software, a house at 1:20, and one dorm room." />
+    <link rel="canonical" href="https://bergmandavid.com/projects/" />
+    <meta property="og:title" content="Projects, David Bergman" />
+    <meta property="og:description" content="Software, a house at 1:20, and one dorm room." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bergmandavid.com/projects/" />
+    <meta property="og:image" content="https://bergmandavid.com/assets/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#e6e9e3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1715" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <script>
+      (() => {
+        let t;
+        try { t = localStorage.getItem("theme"); } catch {}
+        if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans+Mono:ital,wght@0,300..700;1,300..700&display=swap" />
+    <link rel="stylesheet" href="/assets/css/site.css?v=2" />
+    <script type="module" src="/assets/js/plates.js?v=2"></script>
+  </head>
+  <body>
+    <nav class="nav" aria-label="Main">
+      <a href="/">pond</a>
+      <a href="/projects/" aria-current="page">projects</a>
+      <a href="/photos/">photos</a>
+      <a href="/blog/">blog</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme">
+        <svg class="sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="2.9" /><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" /></svg>
+        <svg class="moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" aria-hidden="true"><path d="M13.6 10.1A5.9 5.9 0 0 1 5.9 2.4a5.9 5.9 0 1 0 7.7 7.7Z" /></svg>
+      </button>
+    </nav>
+
+    <main class="page">
+      <header class="page-head">
+        <h1 class="couplet" data-couplet aria-label="things i've made."><span data-couplet-text>things i've made.</span><span class="caret" aria-hidden="true"></span></h1>
+        <p class="page-sub">
+          <span>Software, a house at 1:20, and one dorm room.</span>
+          <a href="https://github.com/davidbergman256">github</a>
+        </p>
+      </header>
+
+      <article class="plate" data-plate="loom">
+        <div class="drawing" style="--cols: 64">
+          <pre role="img" aria-label="A loom: six agent streams as warp threads, shared decisions woven across them, one stream flagged as working from an older decision."></pre>
+          <pre aria-hidden="true"></pre>
+        </div>
+        <div class="title-block">
+          <h2>loomplane</h2>
+          <span>developer tool</span>
+          <span>2026</span>
+        </div>
+        <div class="plate-notes">
+          <p>Shared, versioned context for parallel coding agents. Publish a decision once, and every agent that depends on it can see when its assumptions go stale.</p>
+          <p class="plate-links">
+            <a href="https://davidbergman256.github.io/loomplane/">demo</a> /
+            <a href="https://github.com/davidbergman256/loomplane">source</a>
+          </p>
+        </div>
+      </article>
+
+      <article class="plate" data-plate="book">
+        <div class="drawing" style="--cols: 64">
+          <pre role="img" aria-label="An open book: an English page on the left, the Czech translation appearing on the right, and a waveform of it being read aloud."></pre>
+          <pre aria-hidden="true"></pre>
+        </div>
+        <div class="title-block">
+          <h2>booktr</h2>
+          <span>desktop app</span>
+          <span>2026</span>
+        </div>
+        <div class="plate-notes">
+          <p>Translates whole PDF books into Czech, keeping footnotes and images in place, then narrates them as audiobooks.</p>
+          <p class="plate-links"><a href="https://github.com/davidbergman256/booktr">source</a></p>
+        </div>
+      </article>
+
+      <article class="plate" data-plate="socio">
+        <div class="drawing" style="--cols: 64">
+          <pre role="img" aria-label="Three panels: a chat, a sheet of college deadlines being checked off, and a hub of resources."></pre>
+          <pre aria-hidden="true"></pre>
+        </div>
+        <div class="title-block">
+          <h2>sociolaunch</h2>
+          <span>web app</span>
+          <span>live</span>
+        </div>
+        <div class="plate-notes">
+          <p>College planning help for students without a counselor to lean on: a guided chat, a living sheet of schools and deadlines, and a hub for everything else.</p>
+          <p class="plate-links"><a href="https://sociolaunch.com/">visit</a></p>
+        </div>
+      </article>
+
+      <article class="plate" data-plate="meet">
+        <div class="drawing" style="--cols: 64">
+          <pre role="img" aria-label="A street grid. Four people walk from different edges of the map to the same corner and meet."></pre>
+          <pre aria-hidden="true"></pre>
+        </div>
+        <div class="title-block">
+          <h2>globalink</h2>
+          <span>web app</span>
+          <span>2025</span>
+        </div>
+        <div class="plate-notes">
+          <p>A meetup platform that puts strangers into small, planned events. Built during Leangap; I later designed the visual identity for Moid, which followed it.</p>
+          <p class="plate-links">
+            <a href="https://globalink1.vercel.app/">visit</a> /
+            <a href="https://github.com/davidbergman256/globalink">source</a>
+          </p>
+        </div>
+      </article>
+
+      <article class="plate" data-plate="wave">
+        <div class="drawing" style="--cols: 64">
+          <pre role="img" aria-label="Elevation drawing of a small house with two wave-shaped roofs, one over the living space and one over a studio."></pre>
+          <pre aria-hidden="true"></pre>
+        </div>
+        <div class="title-block">
+          <h2>wave house</h2>
+          <span>architecture</span>
+          <span>fall 2025</span>
+        </div>
+        <div class="plate-notes">
+          <p>A 142-square-foot house under two wave-shaped roofs, one for living and one for a studio. Explored in drawings and ceramics, then built as a 1:20 model in MDF, plexiglass, and ceramic.</p>
+          <p class="plate-links"><a href="mailto:a@bergmandavid.com?subject=Wave%20House">drawings on request</a></p>
+        </div>
+      </article>
+
+      <article class="plate" data-plate="room">
+        <div class="drawing" style="--cols: 64">
+          <pre role="img" aria-label="Floor plan of a common room arranged into a lounge, a games corner, and a long table, with people moving between them."></pre>
+          <pre aria-hidden="true"></pre>
+        </div>
+        <div class="title-block">
+          <h2>common room</h2>
+          <span>spatial design</span>
+          <span>oct 2025</span>
+        </div>
+        <div class="plate-notes">
+          <p>Sketched and rearranged a dorm common room into areas for lounging, games, and working at one long table, so people had a reason to stay and talk.</p>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

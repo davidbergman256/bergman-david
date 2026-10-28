@@ -2,58 +2,76 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>David Bergman</title>
-    <meta name="description" content="Currently, I'm learning Math and CS at MIT." />
+    <meta name="description" content="David Bergman. Learning math and CS at MIT. Drawing, violin, and poker in between." />
     <link rel="canonical" href="https://bergmandavid.com/" />
     <meta property="og:title" content="David Bergman" />
-    <meta property="og:description" content="Currently, I'm learning Math and CS at MIT." />
+    <meta property="og:description" content="Learning math and CS at MIT. Feed the koi while you're here." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://bergmandavid.com/" />
-    <meta property="og:image" content="https://bergmandavid.com/assets/photo-of-the-week.jpg" />
-    <meta property="og:image:alt" content="A yellow pickup truck parked on a leafy street." />
-    <meta name="theme-color" content="#ffffff" />
-    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-    <link
-      rel="preload"
-      href="Mozilla_Text/MozillaText-VariableFont_wght.ttf"
-      as="font"
-      type="font/ttf"
-      crossorigin
-    />
-    <link rel="stylesheet" href="styles.css?v=20261001" />
+    <meta property="og:image" content="https://bergmandavid.com/assets/og.png" />
+    <meta property="og:image:alt" content="ASCII koi swimming in a pond." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#e6e9e3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1715" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <script>
+      (() => {
+        let t;
+        try { t = localStorage.getItem("theme"); } catch {}
+        if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans+Mono:ital,wght@0,300..700;1,300..700&display=swap" />
+    <link rel="stylesheet" href="/assets/css/site.css?v=2" />
+    <script type="module" src="/assets/js/pond.js?v=2"></script>
   </head>
   <body>
-    <main class="page">
-      <section class="about" aria-labelledby="name">
-        <h1 id="name">David Bergman</h1>
+    <nav class="nav" aria-label="Main">
+      <a href="/" aria-current="page">pond</a>
+      <a href="/projects/">projects</a>
+      <a href="/photos/">photos</a>
+      <a href="/blog/">blog</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme">
+        <svg class="sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="2.9" /><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" /></svg>
+        <svg class="moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" aria-hidden="true"><path d="M13.6 10.1A5.9 5.9 0 0 1 5.9 2.4a5.9 5.9 0 1 0 7.7 7.7Z" /></svg>
+      </button>
+    </nav>
+
+    <canvas class="pond-canvas" aria-hidden="true" data-pond></canvas>
+
+    <dl class="pond-hud" aria-hidden="true">
+      <dt>koi</dt>
+      <dd data-koi-count>0</dd>
+      <dt>fed</dt>
+      <dd data-fed-count>0</dd>
+    </dl>
+    <div class="koi-label" data-koi-label aria-hidden="true"></div>
+
+    <main class="home">
+      <section class="intro" aria-labelledby="hello">
+        <p class="couplet" data-couplet aria-hidden="true"><span data-couplet-text></span><span class="caret"></span></p>
         <div class="bio">
-          <p>Currently, I'm learning Math and CS at MIT.</p>
+          <p id="hello">Hi, I'm David.</p>
+          <p>Currently learning math and CS at MIT.</p>
           <p>
-            Previously, I've worked on projects like
-            <a href="https://sociolaunch.com/">sociolaunch</a> or
-            <a href="https://globalink1.vercel.app/">globalink1.vercel.app</a>.
-            In my free time, I enjoy drawing, playing the violin, and poker.
+            Previously, I worked on <a href="https://sociolaunch.com/">sociolaunch</a> and
+            <a href="https://globalink1.vercel.app/">globalink</a>.
           </p>
-          <p>
-            Check out my <a href="assets/David_Bergman_Resume.pdf">resume</a> here,
-            explore my work on <a href="https://github.com/davidbergman256">github</a>,
-            or say hi on <a href="https://x.com/DavidB11012">x</a>,
-            <a href="https://www.linkedin.com/in/david-bergman-a36812332/">linkedin</a>,
-            or at <a class="email" href="mailto:a@bergmandavid.com">a[at]bergmandavid.com</a>.
-          </p>
+          <p>In my free time: drawing, the violin, and poker.</p>
         </div>
+        <p class="links">
+          <a href="/assets/David_Bergman_Resume.pdf">resume</a> /
+          <a href="https://github.com/davidbergman256">github</a> /
+          <a href="https://x.com/DavidB11012">x</a> /
+          <a href="https://www.linkedin.com/in/david-bergman-a36812332/">linkedin</a> /
+          <a href="mailto:a@bergmandavid.com">email</a>
+        </p>
       </section>
-      <figure class="weekly-photo">
-        <img
-          src="assets/photo-of-the-week.jpg"
-          alt="A pale yellow pickup truck parked in front of gray houses and leafy green trees."
-          width="960"
-          height="1280"
-          fetchpriority="high"
-        />
-        <figcaption>photo of the week</figcaption>
-      </figure>
     </main>
   </body>
 </html>
