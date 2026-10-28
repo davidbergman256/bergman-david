@@ -20,8 +20,8 @@ const STONE = " .:-=+*#%@";
 const REFLECT = " .-~=";
 
 const COLORS = {
-  light: { stone: "#2a332f", water: "#56766d", drop: "#56766d" },
-  dark: { stone: "#d9ddd3", water: "#7faea3", drop: "#9cc3b9" },
+  light: { stone: "#2a332f", water: "#56766d", drop: "#56766d", koi: "#c4522c" },
+  dark: { stone: "#d9ddd3", water: "#7faea3", drop: "#9cc3b9", koi: "#ea6b3d" },
 };
 
 // Where the stone sits in the photo, as fractions of its width and height.
@@ -35,6 +35,8 @@ class Stillwater {
     this.rings = [];
     this.time = 0;
     this.nextDrop = 2.5;
+    this.fish = null;
+    this.nextFish = 6;
     this.layout();
     this.palette();
     canvas.addEventListener("pointerdown", (e) => {
@@ -98,6 +100,9 @@ class Stillwater {
     this.gDash = g.glyph("-");
     this.gUnder = g.glyph("_");
     this.gQuote = g.glyph("'");
+    this.gEq = g.glyph("=");
+    this.gTailRight = g.glyph(">");
+    this.gTailLeft = g.glyph("<");
   }
 
   // Density of the stone at a stone-local cell, or -1 outside it.
@@ -115,6 +120,20 @@ class Stillwater {
     if (reducedMotion()) this.render();
   }
 
+  // Now and then a koi passes below, seen from the side through the water:
+  // 1 = body, 2 = its edge, 3 = tail, 0 = not there.
+  fishAt(px, py) {
+    const f = this.fish;
+    if (!f) return 0;
+    const dx = (px - f.x) * f.dir;
+    const wave = Math.sin(dx * 0.09 + this.time * 5) * Math.min(1, Math.max(0, -dx / 30)) * 2.5;
+    const dy = py - f.y - wave;
+    const e = (dx / 34) ** 2 + (dy / 7) ** 2;
+    if (e < 1) return e > 0.55 ? 2 : 1;
+    if (dx < -30 && dx > -50 && Math.abs(dy) < (-30 - dx) * 0.6) return 3;
+    return 0;
+  }
+
   update(dt) {
     this.time += dt;
     if (this.time > this.nextDrop) {
@@ -127,6 +146,21 @@ class Stillwater {
     }
     for (const r of this.rings) r.age += dt;
     this.rings = this.rings.filter((r) => r.age < 5);
+
+    const g = this.grid;
+    const width = g.cols * g.cw;
+    if (!this.fish && this.time > this.nextFish) {
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      const depth = this.waterY + 4 + Math.random() * Math.max(1, g.rows - this.waterY - 8);
+      this.fish = { dir, x: dir > 0 ? -60 : width + 60, y: depth * g.ch };
+    }
+    if (this.fish) {
+      this.fish.x += this.fish.dir * 34 * dt;
+      if (this.fish.x < -80 || this.fish.x > width + 80) {
+        this.fish = null;
+        this.nextFish = this.time + 18 + Math.random() * 20;
+      }
+    }
   }
 
   // Horizontal sway of the reflection on row r, plus the pull of any ring.
@@ -178,6 +212,13 @@ class Stillwater {
       const src = this.waterY - depth * 1.05;
       const fade = clamp(1 - depth / (rows - this.waterY), 0, 1);
       for (let c = 0; c < cols; c++) {
+        const under = this.fishAt((c + 0.5) * cw, (r + 0.5) * ch);
+        if (under) {
+          // Like ><> swimming right and <>< swimming left.
+          const tail = this.fish.dir > 0 ? this.gTailRight : this.gTailLeft;
+          g.draw(under === 1 ? this.gEq : under === 2 ? this.gDash : tail, this.pal.koi[under === 1 ? 4 : 3], c, r);
+          continue;
+        }
         const dx = this.sway(c, r);
         const sc = Math.round(c - this.sx + dx);
         const v = this.stoneAt(sc, Math.round(src - this.sy));
