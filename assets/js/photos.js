@@ -53,6 +53,8 @@ class Photo {
     this.draw();
     this.frame.classList.add("is-ready");
     this.bind();
+    // It may have scrolled into the middle of the screen while loading.
+    if (this.inBand) this.develop(1);
   }
 
   // Sample the image down to one value per character cell.
@@ -219,6 +221,26 @@ addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => photos.forEach((p) => p.rebuild()), 150);
 });
+
+// Without hover, a photo develops as it scrolls to the middle of the
+// screen and returns to characters as it leaves. A tap still pins it.
+if (matchMedia("(hover: none)").matches) {
+  const byFrame = new Map(photos.map((p) => [p.frame, p]));
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        const p = byFrame.get(e.target);
+        if (!p) continue;
+        p.inBand = e.isIntersecting;
+        if (!p.grid || p.pinned) continue;
+        p.focus = [0.5, 0.5];
+        p.develop(e.isIntersecting ? 1 : 0);
+      }
+    },
+    { rootMargin: "-35% 0px -35% 0px" },
+  );
+  photos.forEach((p) => io.observe(p.frame));
+}
 
 const all = document.querySelector("[data-develop-all]");
 all?.addEventListener("click", () => {
