@@ -21,7 +21,7 @@ import {
   rgba,
   hexToRgb,
   typeCouplets,
-} from "./common.js?v=19";
+} from "./common.js?v=20";
 
 const TAU = Math.PI * 2;
 const LEVELS = 12;

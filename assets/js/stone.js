@@ -13,7 +13,7 @@ import {
   reducedMotion,
   rgba,
   typeCouplets,
-} from "./common.js?v=19";
+} from "./common.js?v=20";
 
 const LEVELS = 12;
 const STONE = " .:-=+*#%@";

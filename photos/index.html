@@ -14,7 +14,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#e6e9e3" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0f1715" media="(prefers-color-scheme: dark)" />
-    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/koi.svg" type="image/svg+xml" />
     <script>
       (() => {
         let t;
@@ -22,13 +22,18 @@
         if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         document.documentElement.dataset.theme = t;
         document.documentElement.classList.add("js");
+        // If the photo script never starts, show the photos as they are.
+        setTimeout(() => {
+          const root = document.documentElement;
+          if (!root.classList.contains("photos-live")) root.classList.remove("js");
+        }, 4000);
       })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans+Mono:ital,wght@0,300..700;1,300..700&display=swap" />
-    <link rel="stylesheet" href="/assets/css/site.css?v=19" />
-    <script type="module" src="/assets/js/photos.js?v=19"></script>
+    <link rel="stylesheet" href="/assets/css/site.css?v=20" />
+    <script type="module" src="/assets/js/photos.js?v=20"></script>
   </head>
   <body>
     <nav class="nav" aria-label="Main">

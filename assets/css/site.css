@@ -437,9 +437,18 @@ a:hover {
   height: auto;
 }
 
-/* Until its characters are drawn, keep the photo itself out of sight. */
-.js .photo-frame:not(.is-ready) img {
+/* Until its characters are drawn, keep the photo itself out of sight. If
+   they can't be drawn, the frame falls back to the plain photo. */
+.js .photo-frame:not(.is-ready, .is-plain) img {
   visibility: hidden;
+}
+
+.photo-frame.is-plain {
+  cursor: auto;
+}
+
+.photo-frame.is-plain canvas {
+  display: none;
 }
 
 .photo-frame canvas {

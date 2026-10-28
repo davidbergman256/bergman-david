@@ -1,7 +1,7 @@
 // Photos start as ASCII and develop into the real image, spreading out from
 // wherever the cursor enters. Leave, and the characters grow back over it.
 
-import { AsciiCanvas, clamp, cssVar, currentTheme, fontsReady, hexToRgb, onThemeChange, reducedMotion, rgba, typeCouplets } from "./common.js?v=19";
+import { AsciiCanvas, clamp, cssVar, currentTheme, fontsReady, hexToRgb, onThemeChange, reducedMotion, rgba, typeCouplets } from "./common.js?v=20";
 
 const RAMP = " .,:;-=+*x#%";
 const LEVELS = 10;
@@ -44,17 +44,31 @@ class Photo {
 
   async init() {
     try {
-      await this.img.decode();
+      await this.loaded();
+      this.grid = new AsciiCanvas(this.canvas, { fontSize: 9, lineHeight: 1.0, tracking: 0 });
+      this.build();
+      this.draw();
     } catch {
+      // Whatever went wrong, the plain photo beats an empty frame.
+      this.grid = null;
+      this.frame.classList.add("is-plain");
       return;
     }
-    this.grid = new AsciiCanvas(this.canvas, { fontSize: 9, lineHeight: 1.0, tracking: 0 });
-    this.build();
-    this.draw();
     this.frame.classList.add("is-ready");
     this.bind();
     // It may have scrolled into the middle of the screen while loading.
     if (this.inBand) this.develop(1);
+  }
+
+  // Wait for the load event rather than img.decode(): decode() on a lazy,
+  // hidden image can reject or never settle in some browsers.
+  loaded() {
+    const img = this.img;
+    if (img.complete) return img.naturalWidth ? Promise.resolve() : Promise.reject(new Error("broken image"));
+    return new Promise((resolve, reject) => {
+      img.addEventListener("load", resolve, { once: true });
+      img.addEventListener("error", reject, { once: true });
+    });
   }
 
   // Sample the image down to one value per character cell.
@@ -200,6 +214,9 @@ class Photo {
     this.draw();
   }
 }
+
+// Tell the page's fallback timer this script is running.
+document.documentElement.classList.add("photos-live");
 
 typeCouplets(document.querySelector("[data-couplet]"), ["things i noticed."]);
 
