@@ -9,11 +9,11 @@
 
   --bg: #e6e9e3;
   --ink: #1e2622;
-  --muted: #69736e;
+  --muted: #5d6762;
   --faint: #a4ada7;
   --rule: rgba(30, 38, 34, 0.14);
-  --accent: #b9502c;
-  --select: rgba(185, 80, 44, 0.16);
+  --accent: #ad4824;
+  --select: rgba(173, 72, 36, 0.16);
   color-scheme: light;
 }
 
