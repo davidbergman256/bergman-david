@@ -2,7 +2,7 @@
 // project, animated while it's on screen. Each plate draws into a Sheet,
 // which keeps two layers (ink and accent) rendered as stacked <pre>s.
 
-import { animateWhileVisible, measureAdvance, noise2, reducedMotion, typeCouplets } from "./common.js?v=20";
+import { animateWhileVisible, clamp, measureAdvance, noise2, reducedMotion, typeCouplets } from "./common.js?v=21";
 
 class Sheet {
   constructor(cols, rows) {
@@ -70,52 +70,112 @@ const ROWS = 17;
 // ------------------------------------------------------------------ plates
 
 const PLATES = {
-  // Loomplane: agent streams are the warp, shared decisions the weft.
-  // Now and then a stream falls behind a decision and is flagged stale.
-  loom(s, t, state) {
-    const labels = ["api", "ui", "db", "docs", "tests", "infra"];
-    const warp = labels.map((_, i) => 7 + i * 10);
-    labels.forEach((l, i) => s.text(warp[i] - Math.floor(l.length / 2), 0, l));
-    s.hline(2, COLS - 3, 1, "=");
-    s.hline(2, COLS - 3, 14, "=");
-    const top = 2;
-    const count = 6;
-    const width = COLS - 6;
-    const speed = 30;
-    const cycle = count * width + 200;
-    const p = Math.floor(t * speed) % cycle;
-    const done = Math.floor(p / width);
-    const head = p % width;
-    // A decision goes stale for one stream: on its own once per cycle, or
-    // whenever the drawing is clicked.
-    const flag = state.flag && t < state.flag.until ? state.flag : null;
-    const stale = flag ? Math.max(0, Math.min(done, count) - 1) : 3;
-    const lane = flag ? flag.lane : 1;
-    const staleOn = flag || (done > stale && p > (stale + 1) * width + 70);
-    for (let y = top; y < top + count * 2; y++) for (const x of warp) s.put(x, y, "|");
-    // Each decision is its own thread; it passes over and under the streams.
-    const threads = "-=~-=~";
-    for (let r = 0; r < count; r++) {
-      const y = top + 1 + r * 2;
-      if (r > done) continue;
-      const end = r < done ? width : head;
-      const thread = threads[r];
-      for (let k = 0; k < end; k++) {
-        const x = 3 + k;
-        const wi = warp.indexOf(x);
-        const isStale = staleOn && r === stale && x >= warp[lane] - 4 && x <= warp[lane] + 4;
-        if (wi >= 0) {
-          if ((r + wi) % 2 === 0) s.put(x, y, isStale ? "!" : thread, isStale);
-        } else {
-          s.put(x, y, isStale ? "~" : thread, isStale);
-        }
+  // Agent Glance: a pill of session dots floats over the Claude and Codex
+  // windows. It opens into the list, a finished session gets a spoken
+  // follow-up, and the reply lands in its window.
+  glance(s, t, state) {
+    const smooth = (a, b, v) => clamp((v - a) / (b - a), 0, 1);
+    const key = () => {
+      s.text(1, 16, "o working  ! permission  ? question  * done");
+      const n = sessions.filter(hot).length;
+      s.text(COLS - 12, 16, (n === 1 ? "1 needs you" : `${n} need you`).padStart(11), true);
+    };
+    const cycle = 17;
+    const ph = (((t - (state.offset ?? 0)) % cycle) + cycle) % cycle;
+    const pulse = (i) => (Math.floor(t * 1.3 + i * 0.9) % 3 === 0 ? "O" : "o");
+    const said = "now update the changelog";
+    const sent = ph > 9.2;
+    const sessions = [
+      { app: "claude code", title: "photos fallback", mood: ph < 11.6 ? "work" : "done", work: "Editing photos.js" },
+      { app: "claude code", title: "booktr footnotes", mood: ph < 10.4 ? "perm" : "work", ask: "Allow Bash: npm test?", work: "Running npm test" },
+      { app: "claude code", title: "release notes", mood: sent ? "work" : "done", work: "Writing changelog" },
+      { app: "codex", title: "koi favicon", mood: "work", work: "Running command" },
+      { app: "codex", title: "pricing page", mood: "ask", ask: "Asking: which plan?" },
+    ];
+    const hot = (x) => x.mood === "perm" || x.mood === "ask";
+    const dot = (x, i) => (x.mood === "work" ? pulse(i) : { perm: "!", ask: "?", done: "*" }[x.mood]);
+
+    // The menu bar; its icon is the same row of dots.
+    s.text(1, 0, "claude   file   edit   view   window");
+    sessions.forEach((x, i) => s.put(46 + i * 2, 0, dot(x, i), hot(x)));
+    s.text(58, 0, "9:41");
+    s.hline(0, COLS - 1, 1, "-");
+
+    // Two app windows behind; the reply shows up in Claude's once it's sent.
+    const appWindow = (x0, y0, x1, y1, name) => {
+      for (let y = y0; y <= y1; y++) s.hline(x0, x1, y, " ");
+      s.hline(x0, x1, y0, "-");
+      s.hline(x0, x1, y1, "-");
+      s.vline(x0, y0, y1, "|");
+      s.vline(x1, y0, y1, "|");
+      for (const [x, y] of [[x0, y0], [x1, y0], [x0, y1], [x1, y1]]) s.put(x, y, "+");
+      [...` ${name} `].forEach((ch, k) => s.put(x0 + 3 + k, y0, ch));
+    };
+    appWindow(2, 6, 40, 15, "claude");
+    s.text(5, 8, "~~~~~ ~~~~~~~ ~~~~");
+    s.text(20, 9, "~~~~~~ ~~~~~ ~~");
+    s.text(5, 10, "~~~~ ~~~~~~~~~ ~~~~~~");
+    s.text(5, 11, "~~~~~~ ~~~");
+    if (sent) s.text(37 - said.length, 12, said, ph < 11);
+    s.text(5, 14, "> " + (Math.floor(t * 2) % 2 ? "_" : ""));
+    appWindow(44, 9, 61, 15, "codex");
+    s.text(47, 11, "~~~~ ~~~~~~");
+    s.text(47, 12, "~~~~~~~ ~~");
+
+    // The pill opens on hover and folds back a while later.
+    const open = smooth(3, 3.7, ph) * (1 - smooth(13.4, 14.1, ph));
+    const dictating = ph > 6.2 && ph < 9.6;
+    const rows = [];
+    for (const [i, x] of sessions.entries()) {
+      if (x.app !== sessions[i - 1]?.app) rows.push({ heading: x.app });
+      rows.push({ ...x, i });
+      if (x.title === "release notes" && dictating) {
+        rows.push({ said: said.slice(0, Math.max(0, Math.floor((ph - 6.8) * 16))), caret: !sent });
+        rows.push({ hint: sent ? "sent" : "return to send   esc to cancel" });
       }
-      if (r === done && done < count) s.text(3 + head, y, "<>", true);
     }
-    const version = Math.min(done, count);
-    s.text(2, 16, `decision v${version}`);
-    if (staleOn) s.text(COLS - 24, 16, `${labels[lane]} hasn't seen v${stale + 1}`.padStart(23), true);
-    else s.text(COLS - 24, 16, "every stream is current");
+    const x0 = Math.round(19 - 13 * open);
+    const x1 = Math.round(45 + 13 * open);
+    const y0 = 3;
+    const inner = Math.max(1, Math.round(rows.length * open));
+    const y1 = y0 + 1 + inner;
+    for (let y = y0; y <= y1; y++) s.hline(x0 - 1, x1 + 1, y, " ");
+    s.hline(x0 + 1, x1 - 1, y0, "-");
+    s.hline(x0 + 1, x1 - 1, y1, "-");
+    s.put(x0, y0, ".");
+    s.put(x1, y0, ".");
+    s.put(x0, y1, "'");
+    s.put(x1, y1, "'");
+    if (open < 0.05) {
+      // Folded: one dot per session, a divider, and the mic.
+      s.put(x0 - 1, y0 + 1, "(");
+      s.put(x1 + 1, y0 + 1, ")");
+      sessions.forEach((x, i) => s.put(x0 + 3 + i * 3, y0 + 1, dot(x, i), hot(x)));
+      s.put(x0 + 18, y0 + 1, "|");
+      s.text(x0 + 21, y0 + 1, "mic");
+      return key();
+    }
+    s.vline(x0, y0 + 1, y1 - 1, "|");
+    s.vline(x1, y0 + 1, y1 - 1, "|");
+    // Rows are clipped to the panel while it grows and shrinks.
+    const clip = (x, y, str, accent = false) => {
+      for (let k = 0; k < str.length; k++) if (x + k > x0 + 1 && x + k < x1 - 1 && str[k] !== " ") s.put(x + k, y, str[k], accent);
+    };
+    const L = x0 + 3;
+    const mic = x1 - 5;
+    rows.slice(0, inner).forEach((r, k) => {
+      const y = y0 + 1 + k;
+      if (r.heading) return clip(L, y, r.heading);
+      if (r.hint) return clip(L + 3, y, r.hint);
+      if (r.said !== undefined) return clip(L + 3, y, `"${r.said}${r.caret ? "_" : ""}`, true);
+      const status = hot(r) ? r.ask : r.mood === "done" ? "Done" : r.work;
+      clip(L, y, dot(r, r.i), hot(r));
+      clip(L + 3, y, r.title, hot(r));
+      clip(L + 21, y, status.slice(0, Math.max(0, mic - 1 - (L + 21))), hot(r));
+      const recording = r.title === "release notes" && dictating && !sent;
+      clip(mic, y, recording ? " @ " : "mic", recording);
+    });
+    key();
   },
 
   // BookTr: an English page becomes a Czech page, then a voice.
@@ -409,8 +469,9 @@ const PLATES = {
 
 // What a click does on each plate. (col, row) is the character clicked.
 const CLICKS = {
-  loom(state, col, row, t) {
-    state.flag = { lane: Math.floor(Math.random() * 6), until: t + 3.5 };
+  // Open the list and dictate to the finished session again.
+  glance(state, col, row, t) {
+    state.offset = t - 5.6;
   },
   book(state, col, row, t) {
     state.offset = t;
