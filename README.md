@@ -12,7 +12,7 @@ Everything is drawn with characters. Plain HTML, CSS, and ES modules. GitHub Pag
 
 ## Writing a post
 
-Add a markdown file to `_posts/` named with its date, like `_posts/2026-11-23-on-koi.md`, and push. About a minute later it is live at `/blog/on-koi/`. Its first `# Heading` is the title; no other setup is needed. Images go in `assets/blog/`. Anything in `_drafts/` is never published; `_drafts/how-to-write-a-post.md` shows every formatting option. Posts also feed `/blog/feed.xml` and the sitemap.
+Add a markdown file to `_posts/` named with its date, like `_posts/2026-11-23-on-koi.md`, and push. About a minute later it is live at `/blog/on-koi/`. Its first `# Heading` is the title; no other setup is needed. Its images go in a folder named the same, `assets/blog/on-koi/`. Don't rename a post once it's live: the filename is the URL. Anything in `_drafts/` is never published; `_drafts/how-to-write-a-post.md` shows every formatting option. Posts also feed `/blog/feed.xml` and the sitemap.
 
 To preview the blog locally you need Jekyll (`gem install github-pages`, then `jekyll serve`); the plain Python server below shows every page except the blog.
 
