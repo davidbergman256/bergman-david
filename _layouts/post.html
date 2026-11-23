@@ -1,0 +1,45 @@
+---
+---
+{%- assign lede = content | split: "</p>" | first | strip_html | normalize_whitespace | truncatewords: 40 -%}
+{%- assign words = content | strip_html | number_of_words -%}
+{%- assign minutes = words | divided_by: 220 | at_least: 1 -%}
+{%- assign summary = page.description | default: lede -%}
+<!doctype html>
+<html lang="en">
+  <head>
+    {% include head.html title=page.title description=summary type="article" image=page.image %}
+    <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}" />
+    <script type="module" src="/assets/js/common.js?v=22"></script>
+  </head>
+  <body>
+    {% include nav.html current="blog" %}
+
+    <main class="page is-post">
+      <article class="post">
+        <header class="post-head">
+          <h1>{{ page.title }}</h1>
+          <p class="post-meta">
+            <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%-d %b %Y" | downcase }}</time>
+            <span>{{ minutes }} min</span>
+          </p>
+        </header>
+        <div class="prose">
+          {{ content }}
+        </div>
+      </article>
+
+      <nav class="post-foot" aria-label="More writing">
+        {%- if page.previous %}
+        <a href="{{ page.previous.url }}" rel="prev"><span>older</span>{{ page.previous.title }}</a>
+        {%- else %}
+        <span></span>
+        {%- endif %}
+        {%- if page.next %}
+        <a href="{{ page.next.url }}" rel="next"><span>newer</span>{{ page.next.title }}</a>
+        {%- else %}
+        <a href="/blog/"><span>back</span>all writing</a>
+        {%- endif %}
+      </nav>
+    </main>
+  </body>
+</html>

@@ -1,3 +1,5 @@
 .claude/
 .DS_Store
 .playwright-mcp/
+_site/
+.jekyll-cache/
