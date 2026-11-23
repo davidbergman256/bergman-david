@@ -1,5 +1,6 @@
-// The blog isn't written yet, so for now: a stone resting at the waterline,
-// its reflection trembling below. Click the water to drop a pebble.
+// A stone resting at the waterline, its reflection trembling below. Click the
+// water to drop a pebble. It fills the blog until there's writing, then sits
+// under the list of posts.
 
 import {
   AsciiCanvas,
@@ -13,7 +14,7 @@ import {
   reducedMotion,
   rgba,
   typeCouplets,
-} from "./common.js?v=21";
+} from "./common.js?v=22";
 
 const LEVELS = 12;
 const STONE = " .:-=+*#%@";
@@ -262,7 +263,8 @@ class Stillwater {
   }
 }
 
-typeCouplets(document.querySelector("[data-couplet]"), ["coming soon."]);
+const couplet = document.querySelector("[data-couplet]");
+typeCouplets(couplet, [couplet?.getAttribute("aria-label") ?? "coming soon."]);
 
 const canvas = document.querySelector("[data-stillwater]");
 const img = new Image();

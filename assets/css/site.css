@@ -495,6 +495,251 @@ a:hover {
   text-align: center;
 }
 
+/* Once there are posts, the stone moves below the list. */
+.stillwater-scene.is-footer {
+  width: min(100%, 520px);
+  margin: 88px auto 0;
+}
+
+.stillwater-scene.is-footer canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  cursor: crosshair;
+}
+
+.posts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+
+.posts li {
+  padding: 22px 0 24px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.posts a {
+  display: grid;
+  grid-template-columns: 12ch minmax(0, 1fr) auto;
+  gap: 4px 20px;
+  align-items: baseline;
+  text-decoration: none;
+}
+
+.posts time,
+.posts-min {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.posts-title {
+  font-weight: 500;
+}
+
+.posts a:hover .posts-title {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.posts p {
+  max-width: 62ch;
+  margin: 8px 0 0 calc(12ch + 20px);
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------------- post */
+
+.page.is-post {
+  width: min(100% - 2 * var(--gutter), 64ch);
+}
+
+.post-head {
+  margin-bottom: 48px;
+}
+
+.post-head h1 {
+  margin: 0 0 6px;
+  font-size: 1.35em;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.post-meta {
+  display: flex;
+  gap: 20px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.prose > * + * {
+  margin-top: 1.3em;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  margin: 2.4em 0 0;
+  font-size: 1em;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.prose h2::before {
+  content: "## ";
+  color: var(--accent);
+}
+
+.prose h3::before {
+  content: "### ";
+  color: var(--faint);
+}
+
+.prose h2 + *,
+.prose h3 + *,
+.prose h4 + * {
+  margin-top: 0.6em;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 2.5ch;
+}
+
+.prose li + li {
+  margin-top: 0.35em;
+}
+
+.prose ul > li::marker {
+  content: "- ";
+  color: var(--muted);
+}
+
+.prose blockquote {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 2ch;
+  border-left: 1px solid var(--accent);
+  color: var(--muted);
+}
+
+.prose blockquote > * + * {
+  margin-top: 0.8em;
+}
+
+.prose hr {
+  height: auto;
+  margin: 2.6em 0;
+  border: 0;
+  color: var(--faint);
+  text-align: center;
+}
+
+.prose hr::before {
+  content: "~  ~  ~";
+}
+
+.prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.prose p:has(> img:only-child) {
+  margin-block: 2em;
+}
+
+.prose img + em {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.prose code {
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  background: var(--rule);
+  font-family: inherit;
+  font-size: 0.95em;
+}
+
+.prose pre {
+  overflow-x: auto;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  line-height: 1.55;
+}
+
+.prose pre code {
+  padding: 0;
+  background: none;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.prose th,
+.prose td {
+  padding: 6px 12px 6px 0;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  font-weight: 500;
+}
+
+.prose sup a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.prose .footnotes {
+  margin-top: 3em;
+  padding-top: 1.2em;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.prose .footnotes ol {
+  padding-left: 3ch;
+}
+
+.post-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 72px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+
+.post-foot a {
+  display: grid;
+  gap: 2px;
+  text-decoration: none;
+}
+
+.post-foot a[rel="next"],
+.post-foot a:last-child {
+  text-align: right;
+}
+
+.post-foot a span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 /* -------------------------------------------------------------------- 404 */
 
 .empty-water {
@@ -580,6 +825,18 @@ a:hover {
 
   .stillwater canvas {
     aspect-ratio: 4 / 3;
+  }
+
+  .posts a {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .posts time {
+    grid-column: 1 / -1;
+  }
+
+  .posts p {
+    margin-left: 0;
   }
 
   .title-block {

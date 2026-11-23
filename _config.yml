@@ -1,0 +1,43 @@
+# GitHub Pages runs Jekyll on every push. Only files with front matter (the
+# blog pages, the posts, the sitemap) are templated; everything else is
+# copied to the site exactly as it is.
+
+title: David Bergman
+description: Writing by David Bergman.
+url: https://bergmandavid.com
+author: David Bergman
+timezone: America/New_York
+
+permalink: /blog/:title/
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter_opts:
+    disable: true
+
+plugins:
+  - jekyll-feed
+  - jekyll-titles-from-headings
+
+# A post's title can come from its first "# Heading" instead of front matter.
+titles_from_headings:
+  enabled: true
+  strip_title: true
+  collections: true
+
+feed:
+  path: blog/feed.xml
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
