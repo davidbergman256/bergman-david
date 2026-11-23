@@ -18,7 +18,7 @@ To preview the blog locally you need Jekyll (`gem install github-pages`, then `j
 
 ## Other upkeep
 
-To change the photo of the week, replace `assets/photo-of-the-week.jpg` and update its alt text in `photos/index.html`. The resume is `assets/David_Bergman_Resume.pdf`.
+To add a photo, put it in `assets/photos/` and copy one of the `<figure>` blocks in `photos/index.html`, changing its path, size, alt text, and caption. The resume is `assets/David_Bergman_Resume.pdf`.
 
 CSS and JS are cache-busted with a `?v=N` query, in the HTML files and in each page script's `common.js` import. When you change them, bump every `?v=N` to the same new number.
 
