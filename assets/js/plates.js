@@ -2,7 +2,7 @@
 // project, animated while it's on screen. Each plate draws into a Sheet,
 // which keeps two layers (ink and accent) rendered as stacked <pre>s.
 
-import { animateWhileVisible, clamp, measureAdvance, noise2, reducedMotion, typeCouplets } from "./common.js?v=21";
+import { animateWhileVisible, clamp, measureAdvance, noise2, reducedMotion, typeCouplets } from "./common.js?v=22";
 
 class Sheet {
   constructor(cols, rows) {
@@ -350,121 +350,6 @@ const PLATES = {
       s.text(Math.min(COLS - label.length, mx + 2), my - 1, label, true);
     }
   },
-
-  // Wave House: an elevation, plotted stroke by stroke.
-  wave(s, t, state) {
-    if (!state.marks) {
-      const marks = [];
-      const add = (x, y, ch) => marks.push([x, y, ch]);
-      // Ground and earth.
-      for (let x = 2; x <= 61; x++) add(x, 13, "=");
-      for (let x = 3; x <= 60; x += 3) add(x, 14, "/");
-      // Walls.
-      for (let y = 7; y <= 12; y++) {
-        add(10, y, "|");
-        add(53, y, "|");
-      }
-      for (let y = 9; y <= 12; y++) add(32, y, ":");
-      // Two wave roofs, each a slab: a crest line with its underside.
-      const roof = (x0, x1, base, amp, cycles, phase) => {
-        const under = [];
-        for (let x = x0; x <= x1; x++) {
-          const u = (x - x0) / (x1 - x0);
-          const y = base - amp * Math.sin(u * Math.PI * 2 * cycles + phase);
-          const fy = Math.floor(y);
-          const f = y - fy;
-          add(x, fy, f < 0.34 ? "`" : f < 0.67 ? "-" : "_");
-          if (x % 2 === 0) under.push([x, fy + 1, "."]);
-        }
-        for (const m of under) add(...m);
-      };
-      roof(7, 33, 5.2, 2.3, 0.85, 0.5);
-      roof(30, 56, 5.6, 1.9, 0.85, 2.9);
-      // Openings and labels.
-      for (const [x, y, str] of [
-        [14, 10, "[  ]"],
-        [44, 9, "[    ]"],
-        [26, 11, "|"],
-        [26, 12, "|"],
-        [29, 11, "|"],
-        [29, 12, "|"],
-        [15, 12, "living"],
-        [40, 12, "studio"],
-      ]) {
-        for (let i = 0; i < str.length; i++) if (str[i] !== " ") add(x + i, y, str[i]);
-      }
-      for (const [x, str] of [
-        [2, "elevation"],
-        [48, "142 sq ft"],
-      ])
-        for (let i = 0; i < str.length; i++) add(x + i, 16, str[i]);
-      state.marks = marks;
-    }
-    const n = reducedMotion() ? state.marks.length : Math.floor(t * 70);
-    const shown = Math.min(n, state.marks.length);
-    for (let i = 0; i < shown; i++) {
-      const [x, y, ch] = state.marks[i];
-      s.put(x, y, ch);
-    }
-    if (shown < state.marks.length) {
-      const [x, y] = state.marks[shown];
-      s.put(x, y, "+", true);
-    }
-  },
-
-  // The common room: furniture in zones, people drifting between them.
-  room(s, t, state) {
-    s.box(1, 0, 62, 15);
-    for (let x = 28; x <= 34; x++) s.put(x, 15, " ");
-    s.text(28, 14, "\\");
-    s.text(34, 14, "/");
-    for (const x0 of [8, 22, 42]) s.hline(x0, x0 + 8, 0, "=");
-    // Lounge.
-    s.text(4, 3, "[=========]");
-    s.vline(4, 4, 6, "[");
-    s.text(8, 5, "( )");
-    s.text(4, 8, "lounge");
-    // Games.
-    s.box(44, 3, 54, 7);
-    s.text(46, 5, "# # # #");
-    s.text(46, 9, "games");
-    // Long table with chairs.
-    s.text(20, 10, "o  o  o  o  o");
-    s.text(19, 11, "[=============]");
-    s.text(20, 12, "o  o  o  o  o");
-    s.text(37, 11, "table");
-    const seats = [
-      [7, 4],
-      [10, 6],
-      [6, 6],
-      [47, 4],
-      [51, 6],
-      [49, 2],
-      [23, 10],
-      [29, 12],
-      [32, 10],
-      [26, 12],
-    ];
-    if (!state.people) {
-      state.people = Array.from({ length: 6 }, (_, i) => {
-        const s0 = seats[(i * 3) % seats.length];
-        return { x: s0[0], y: s0[1], tx: s0[0], ty: s0[1], next: Math.random() * 3 };
-      });
-    }
-    const dt = state.last ? Math.min(0.2, t - state.last) : 0;
-    state.last = t;
-    for (const p of state.people) {
-      if (t > p.next) {
-        const seat = seats[Math.floor(Math.random() * seats.length)];
-        p.tx = seat[0];
-        p.ty = seat[1];
-        p.next = t + 3 + Math.random() * 5;
-      }
-      p.x += Math.sign(p.tx - p.x) * Math.min(Math.abs(p.tx - p.x), dt * 9);
-      p.y += Math.sign(p.ty - p.y) * Math.min(Math.abs(p.ty - p.y), dt * 4.5);
-      s.put(p.x, p.y, "*", true);
-    }
-  },
 };
 
 // What a click does on each plate. (col, row) is the character clicked.
@@ -495,10 +380,6 @@ const CLICKS = {
       const corner = onRow ? [meet[0], y] : [x, meet[1]];
       p.path = [[x, y], corner, meet];
     }
-  },
-  room(state, col, row, t) {
-    if (!state.people || state.people.length >= 12) return;
-    state.people.push({ x: 31, y: 14, tx: 31, ty: 11, next: t + 1.5 });
   },
 };
 
@@ -532,12 +413,6 @@ for (const plate of document.querySelectorAll("[data-plate]")) {
     if (acc_ < 1 / 14) return;
     acc_ = 0;
     paint(local);
-  });
-  plate.addEventListener("pointerenter", () => {
-    if (plate.dataset.plate === "wave") {
-      state.marks = null;
-      local = 0;
-    }
   });
   const click = CLICKS[plate.dataset.plate];
   const drawing = plate.querySelector(".drawing");
